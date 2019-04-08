@@ -4,5 +4,5 @@
   - using Reddit comments from [pushshift](https://files.pushshift.io/reddit/comments/)
 
 ## Woking in progress
-- [] Processing RAW JSON file
-- [] Finish the database
+- [ ] Processing RAW JSON file
+- [ ] Finish the database
