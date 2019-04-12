@@ -67,7 +67,7 @@ def acceptable(data):
         return True
 
 
-def transaction_bldr(sql):
+def builder(sql):
     global sql_transaction
     sql_transaction.append(sql)
     if len(sql_transaction) > 1000:
@@ -85,7 +85,7 @@ def sql_insert_replace_comment(commentid, parentid, parent, comment, subreddit, 
     try:
         sql = """UPDATE parent_reply SET parent_id = ?, comment_id = ?, parent = ?, comment = ?, subreddit = ?, unix = ?, score = ? WHERE parent_id =?;""".format(
             parentid, commentid, parent, comment, subreddit, int(time), score, parentid)
-        transaction_bldr(sql)
+        builder(sql)
     except Exception as e:
         print('s-UPDATE insertion', str(e))
 
@@ -94,7 +94,7 @@ def sql_insert_has_parent(commentid, parentid, parent, comment, subreddit, time,
     try:
         sql = """INSERT INTO parent_reply (parent_id, comment_id, parent, comment, subreddit, unix, score) VALUES ("{}","{}","{}","{}","{}",{},{});""".format(
             parentid, commentid, parent, comment, subreddit, int(time), score)
-        transaction_bldr(sql)
+        builder(sql)
     except Exception as e:
         print('s-PARENT insertion', str(e))
 
@@ -103,7 +103,7 @@ def sql_insert_no_parent(commentid, parentid, comment, subreddit, time, score):
     try:
         sql = """INSERT INTO parent_reply (parent_id, comment_id, comment, subreddit, unix, score) VALUES ("{}","{}","{}","{}",{},{});""".format(
             parentid, commentid, comment, subreddit, int(time), score)
-        transaction_bldr(sql)
+        builder(sql)
     except Exception as e:
         print('s-NO_PARENT insertion', str(e))
 
