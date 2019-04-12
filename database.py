@@ -20,13 +20,13 @@ def create_table():
     ''')
 
 
-def format_data(data):
-    data = data.replace('\n', ' newlinechar ').replace(
-        '\r', ' newlinechar ').replace('"', "'")
+def formatted(data):
+    data = data.replace('\n', ' ').replace(
+        '\r', ' ').replace('"', "'")
     return data
 
 
-def find_parent(pid):
+def fparent(pid):
     try:
         sql = "SELECT comment FROM parent_reply WHERE comment_id = '{}' \
         LIMIT 1".format(pid)
@@ -37,11 +37,11 @@ def find_parent(pid):
         else:
             return False
     except Exception as e:
-        # print("find_parent", e)
+        # print("fparent", e)
         return False
 
 
-def find_existing_score(pid):
+def fscore(pid):
     try:
         sql = "SELECT score FROM parent_reply WHERE parent_id = '{}' \
         LIMIT 1".format(pid)
@@ -81,28 +81,42 @@ def builder(sql):
         sql_transaction = []
 
 
-def sql_insert_replace_comment(commentid, parentid, parent, comment, subreddit, time, score):
+def insrcomment(cid, pid, parent, comment, subreddit, time, score):
     try:
-        sql = """UPDATE parent_reply SET parent_id = ?, comment_id = ?, parent = ?, comment = ?, subreddit = ?, unix = ?, score = ? WHERE parent_id =?;""".format(
-            parentid, commentid, parent, comment, subreddit, int(time), score, parentid)
+        sql = '''
+        UPDATE parent_reply SET
+        parent_id = ?,
+        comment_id = ?,
+        parent = ?,
+        comment = ?,
+        subreddit = ?,
+        unix = ?,
+        score = ?
+        WHERE parent_id =?;'''.format(
+            pid, cid, parent, comment, subreddit, int(time), score, pid)
         builder(sql)
     except Exception as e:
         print('s-UPDATE insertion', str(e))
 
 
-def sql_insert_has_parent(commentid, parentid, parent, comment, subreddit, time, score):
+def inspar(cid, pid, parent, comment, subreddit, time, score):
     try:
-        sql = """INSERT INTO parent_reply (parent_id, comment_id, parent, comment, subreddit, unix, score) VALUES ("{}","{}","{}","{}","{}",{},{});""".format(
-            parentid, commentid, parent, comment, subreddit, int(time), score)
+        sql = '''
+        INSERT INTO parent_reply
+        (parent_id, comment_id, parent, comment, subreddit, unix, score)
+        VALUES ("{}","{}","{}","{}","{}",{},{});'''.format(
+            pid, cid, parent, comment, subreddit, int(time), score)
         builder(sql)
     except Exception as e:
         print('s-PARENT insertion', str(e))
 
 
-def sql_insert_no_parent(commentid, parentid, comment, subreddit, time, score):
+def insnopar(cid, pid, comment, subreddit, time, score):
     try:
-        sql = """INSERT INTO parent_reply (parent_id, comment_id, comment, subreddit, unix, score) VALUES ("{}","{}","{}","{}",{},{});""".format(
-            parentid, commentid, comment, subreddit, int(time), score)
+        sql = '''INSERT INTO parent_reply
+        (parent_id, comment_id, comment, subreddit, unix, score)
+        VALUES ("{}","{}","{}","{}",{},{});'''.format(
+            pid, cid, comment, subreddit, int(time), score)
         builder(sql)
     except Exception as e:
         print('s-NO_PARENT insertion', str(e))
@@ -116,34 +130,28 @@ if __name__ == "__main__":
 with open("/home/aazasdass/Documents/Coding/tob/RC/RC_{}".format(
         tf), buffering=1000) as f:
     for r in f:
-        # print(r)
-        # This will print out all the rows inside the file
         row_counter += 1
         row = json.loads(r)
         parent_id = row['parent_id']
-        body = format_data(row['body'])
+        body = formatted(row['body'])
         created_utc = row['created_utc']
         score = row['score']
         subreddit = row['subreddit']
         comment_id = row['name']
 
-        parent_data = find_parent(parent_id)
+        parent_data = fparent(parent_id)
         if score >= 2:
             if acceptable(body):
-                existing_comment_score = find_existing_score(parent_id)
+                existing_comment_score = fscore(parent_id)
                 if existing_comment_score:
                     if score > existing_comment_score:
-                        sql_insert_replace_comment(
-                            comment_id, parent_id, parent_data, body, subreddit, created_utc, score)
-
+                        insrcomment(comment_id, parent_id, parent_data, body, subreddit, created_utc, score)
                 else:
                     if parent_data:
-                        sql_insert_has_parent(
-                            comment_id, parent_id, parent_data, body, subreddit, created_utc, score)
+                        inspar(comment_id, parent_id, parent_data, body, subreddit, created_utc, score)
                         paired_rows += 1
                     else:
-                        sql_insert_no_parent(
-                            comment_id, parent_id, body, subreddit, created_utc, score)
+                        insnopar(comment_id, parent_id, body, subreddit, created_utc, score)
 
         if row_counter % 100000 == 0:
             print('Total Rows Read: {}, Paired Rows: {}, Time: {}'.format(

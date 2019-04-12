@@ -10,7 +10,7 @@ A chatbot that will cheer will up when you are sad
 - [ ] Setting up training dataset
 - [ ] Creating training model
 
-##Logs
+## Logs
 
 Thought process for buffering the data:
 First option: uses SQLite3 to process raw JSON file and then input all necessary value such as _parent_id_ _subreddit_id_ _comment_id_ out
@@ -22,7 +22,6 @@ Might still uses SQLite3 but might have to think another solution to solve time 
 Second option: might as well put straight all the data into pandas using _pd.read_json()_ and then process all the trash data from pandas
 dataframe but that shit does not work
 
-Third option: mongoDB?? nope
-
-reddit comment have too much trash to clean ==> makes it longer to train
-have to process the data first?
+Models to train
+- Recurrent Neural Network (RNN)
+- seq2seq (depricated) ==> nmt
