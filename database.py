@@ -4,7 +4,7 @@ from datetime import datetime
 
 tf = '2010-10'
 sql_transaction = []
-connection = sqlite3.connect('{}.db'.format(tf))
+connection = sqlite3.connect('database/{}.db'.format(tf))
 c = connection.cursor()
 
 
