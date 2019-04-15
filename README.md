@@ -19,6 +19,7 @@ A chatbot that will cheer will up when you are sad
 
 -   In order to create a chatbot, I will need to build a training database for the chatbot, I decide to use Reddit data dump from [pushshift.io](https://files.pushshift.io/reddit/comments/). Current using _2010-10_
 -   The format of a RC.json file looks like:
+```
   {
     __"parent_id":"t1_c110jjw",__
     __"created_utc":"1285891201",__
@@ -42,6 +43,8 @@ A chatbot that will cheer will up when you are sad
     "downs":0,
     "controversiality":0
   }
+  ```
+  
   - One can see there is a lot of unecessary information within this file, and the only crucial information is highlighted above. Because we are procesing through thousands of data lines, it would be time-expensive to add unecessary information (_O(n)_) ==> Firgure out how to remove unecessary dataset
 
   _Problem 1_: Working with JSON file.
