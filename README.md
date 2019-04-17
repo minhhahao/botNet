@@ -58,7 +58,7 @@ _Problem 2_: Constructing the database through _SQLite3_
       - When I download the most recent RC file from [pushshift.io](https://files.pushshift.io/reddit/comments/), the compressed file is already 10GB, the uncompressed file can easily exceed my 16GB of RAM, therefore I need to buffer through the data and only stored necessary info in a _SQLite3_ Database
       - Since a reply has a parent comment, the idea is that we can insert reply into the database, and we can match the two with same _id_, thus we can have rows that have a parent comment and a reply that go with it
       - Since reddit comments are measured through _score_, I will use score as my parameter to show whether the reply is relevant to the question.
-  - _2.2_: Commit in SQLite3
+  - _2.2_: `COMMIT` in SQLite3
       - in order to insert rows of data into the database, SQL has a function called `COMMIT` that will put data into the database. Since we are working with millions of rows (currently working with RC from Oct-2010), it would be time-consuming to do it one by one. Therefore, creating a _sql_transaction_ will help put all the queries in one group and execute them all, [This](https://www.tutorialspoint.com/sql/sql-transactions.htm) article from TutorialPoint explains clearly about using transaction in SQL
   - _2.3_: Working I/O file in Python
       - In Java, the process of I/O file in Java requires a `FileWriter`->`BufferedReader`->`FileWriter`->`BufferedWriter`. However, from [this](https://www.guru99.com/reading-and-writing-files-in-python.html) article, using `open()` function with more parameter will do the job for I/O files
