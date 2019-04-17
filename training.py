@@ -7,7 +7,7 @@ connection = sqlite3.connect('database/{}.db'.format(tf))
 c = connection.cursor()
 limit = 1000  # limit to pull data into pandas
 last_unix = 0  # help buffer through data
-cur_length = limit
+cur_length = limit  # keep track of when the test is finish
 counter = 0
 test_done = False
 
