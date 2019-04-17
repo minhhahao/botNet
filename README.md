@@ -1,17 +1,19 @@
 # tob
 
-A chatbot that will cheer will up when you are sad
+A chatbot that will talk to you when it sees you
 
-1.  Processing Database for the bot
+## Plans
 
--   using Reddit comments from [pushshift.io](https://files.pushshift.io/reddit/comments/)
+- Using Reddit comments from [pushshift.io](https://files.pushshift.io/reddit/comments/) as dataset
+- Implements [Tensorflow NMT](https://github.com/tensorflow/nmt) (Neural Machine Translation) for training the chatbot (currently working)
+- Implements Convolutional Neural Network model for object detection YOLOv3 (in the future)
 
 ## Woking in progress
 
 -   [x] Processing RAW JSON file
 -   [x] Finish the database
--   [ ] Setting up training dataset
--   [ ] Creating training model
+-   [x] Setting up training dataset
+-   [ ] Creating training model from scratch with [tensorflow/nmt](https://github.com/tensorflow/nmt)
 
 ## Logs
 
@@ -78,4 +80,3 @@ _Problem 2_: Constructing the database through _SQLite3_
 _Problem 3_: creating _training_data_
   - How can the model understand what is the question and what is the appropriate answers to it?
   - Therefore I need to create a .from file (txt file) to a .to file (txt file) using the from the rows of the database so that the model can have a base to train => therefore I create a `training.py` to create training data. Inside the file include simple writing files and some sql queries
-   
