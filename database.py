@@ -1,6 +1,8 @@
 import sqlite3
 import json
 from datetime import datetime
+import os
+
 
 tf = '2010-10'
 sql_transaction = []
@@ -31,6 +33,10 @@ def fparent(pid):
         LIMIT 1".format(pid)
     c.execute(sql)
     result = c.fetchone()
+<<<<<<< HEAD
+=======
+
+>>>>>>> cc8696c1a7de97c5febdcbace3b1517358f45e29
     if result is not None:
         return result[0]
     else:
@@ -110,6 +116,9 @@ if __name__ == "__main__":
     row_counter = 0
     paired_rows = 0
 
+# Windows path : C:\\Users\\Aaron Pham\\Documents\\Coding\\CS\\repo\\tob\\RC\\RC_2010-10
+# Needed to find a fix for this incompablility
+
 with open("/home/aazasdass/Documents/Coding/tob/RC/RC_{}".format(
         tf), buffering=1000) as f:
     for r in f:
@@ -139,6 +148,7 @@ with open("/home/aazasdass/Documents/Coding/tob/RC/RC_{}".format(
                         insnopar(comment_id, parent_id, body,
                                  subreddit, created_utc, score)
 
+        # Logging purposes
         if row_counter % 100000 == 0:
             print('Total Rows Read: {}, Paired Rows: {}, Time: {}'.format(
                 row_counter, paired_rows, str(datetime.now())))
