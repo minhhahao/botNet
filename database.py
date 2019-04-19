@@ -27,24 +27,26 @@ def formatted(data):
 
 
 def fparent(pid):
-        sql = "SELECT comment FROM parent_reply WHERE comment_id = '{}' \
+    sql = "SELECT comment FROM parent_reply WHERE comment_id = '{}' \
         LIMIT 1".format(pid)
-        c.execute(sql)
-        result = c.fetchone()
-        if result is not None:
-            return result[0]
-        else:
-            return False
+    c.execute(sql)
+    result = c.fetchone()
+    if result is not None:
+        return result[0]
+    else:
+        return False
+
 
 def fscore(pid):
-        sql = "SELECT score FROM parent_reply WHERE parent_id = '{}' \
+    sql = "SELECT score FROM parent_reply WHERE parent_id = '{}' \
         LIMIT 1".format(pid)
-        c.execute(sql)
-        result = c.fetchone()
-        if result is not None:
-            return result[0]
-        else:
-            return False
+    c.execute(sql)
+    result = c.fetchone()
+    if result is not None:
+        return result[0]
+    else:
+        return False
+
 
 def acceptable(data):
     if len(data.split(' ')) > 50 or len(data) < 1:
@@ -58,7 +60,7 @@ def acceptable(data):
 
 
 def insrcomment(cid, pid, parent, comment, subreddit, time, score):
-        sql = '''
+    sql = '''
         UPDATE parent_reply SET
         parent_id = ?,
         comment_id = ?,
@@ -68,24 +70,25 @@ def insrcomment(cid, pid, parent, comment, subreddit, time, score):
         unix = ?,
         score = ?
         WHERE parent_id =?;'''.format(
-            pid, cid, parent, comment, subreddit, int(time), score, pid)
-        builder(sql)
+        pid, cid, parent, comment, subreddit, int(time), score, pid)
+    builder(sql)
+
 
 def inspar(cid, pid, parent, comment, subreddit, time, score):
-        sql = '''
+    sql = '''
         INSERT INTO parent_reply
         (parent_id, comment_id, parent, comment, subreddit, unix, score)
         VALUES ("{}","{}","{}","{}","{}",{},{});'''.format(
-            pid, cid, parent, comment, subreddit, int(time), score)
-        builder(sql)
+        pid, cid, parent, comment, subreddit, int(time), score)
+    builder(sql)
 
 
 def insnopar(cid, pid, comment, subreddit, time, score):
-        sql = '''INSERT INTO parent_reply
+    sql = '''INSERT INTO parent_reply
         (parent_id, comment_id, comment, subreddit, unix, score)
         VALUES ("{}","{}","{}","{}",{},{});'''.format(
-            pid, cid, comment, subreddit, int(time), score)
-        builder(sql)
+        pid, cid, comment, subreddit, int(time), score)
+    builder(sql)
 
 
 def builder(sql):
