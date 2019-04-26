@@ -33,10 +33,6 @@ def fparent(pid):
         LIMIT 1".format(pid)
     c.execute(sql)
     result = c.fetchone()
-<<<<<<< HEAD
-=======
-
->>>>>>> cc8696c1a7de97c5febdcbace3b1517358f45e29
     if result is not None:
         return result[0]
     else:
@@ -119,7 +115,7 @@ if __name__ == "__main__":
 # Windows path : C:\\Users\\Aaron Pham\\Documents\\Coding\\CS\\repo\\tob\\RC\\RC_2010-10
 # Needed to find a fix for this incompablility
 
-with open("/home/aazasdass/Documents/Coding/tob/RC/RC_{}".format(
+with open("/home/aar0npham/Documents/Coding/tob/RC/RC_{}.json".format(
         tf), buffering=1000) as f:
     for r in f:
         row_counter += 1
