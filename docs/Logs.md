@@ -1,5 +1,6 @@
 # Logs
-
+- [Week 1 - 2](#Week_1_-_2)
+- [Week 3](#Week_3)
 ## Week 1 - 2 : Creating database
 
 -   In order to create a chatbot, I will need to build a training database for the chatbot, I decide to use Reddit data dump from [pushshift.io](https://files.pushshift.io/reddit/comments/). Current using _2010-10_
