@@ -1,12 +1,11 @@
 import sqlite3
 import json
 from datetime import datetime
-import os
 
 
 tf = '2010-10'
 sql_transaction = []
-connection = sqlite3.connect('database/{}.db'.format(tf))
+connection = sqlite3.connect('/home/aar0npham/Documents/Coding/tob/structure/database/{}.db'.format(tf))
 c = connection.cursor()
 
 
@@ -115,7 +114,7 @@ if __name__ == "__main__":
 # Windows path : C:\\Users\\Aaron Pham\\Documents\\Coding\\CS\\repo\\tob\\RC\\RC_2010-10
 # Needed to find a fix for this incompablility
 
-with open("/home/aar0npham/Documents/Coding/tob/RC/RC_{}.json".format(
+with open("/home/aar0npham/Documents/Coding/tob/structure/RC/RC_{}.json".format(
         tf), buffering=1000) as f:
     for r in f:
         row_counter += 1

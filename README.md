@@ -2,7 +2,7 @@
 
 A chatbot that will talk to you when it sees you
 
-- [Logs](docs/logs.md)
+- [Logs](docs/Logs.md)
 
 ## Plans
 

@@ -3,7 +3,8 @@ import pandas as pd
 
 tf = '2010-10'
 
-connection = sqlite3.connect('database/{}.db'.format(tf))
+connection = sqlite3.connect(
+    '/home/aar0npham/Documents/Coding/tob/structure/database/{}.db'.format(tf))
 c = connection.cursor()
 limit = 1000  # limit to pull data into pandas
 last_unix = 0  # help buffer through data
@@ -21,21 +22,21 @@ while cur_length == limit:
     cur_length = len(df)
 
     if not test_done:
-        with open("training_data/tst.from", "a", encoding='utf8') as f:
+        with open("/home/aar0npham/Documents/Coding/tob/structure/training_data/tst.from", "a", encoding='utf8') as f:
             for content in df['parent'].values:
                 f.write(content + '\n')
 
-        with open("training_data/tst.to", "a", encoding='utf8') as f:
+        with open("/home/aar0npham/Documents/Coding/tob/structure/training_data/tst.to", "a", encoding='utf8') as f:
             for content in df['comment'].values:
                 f.write(content + '\n')
 
         test_done = True
 
     else:
-        with open("training_data/tr.from", "a", encoding='utf8') as f:
+        with open("/home/aar0npham/Documents/Coding/tob/structure/training_data/tr.from", "a", encoding='utf8') as f:
             for content in df['parent'].values:
                 f.write(content + '\n')
-        with open("training_data/tr.to", "a", encoding='utf8') as f:
+        with open("/home/aar0npham/Documents/Coding/tob/structure/training_data/tr.to", "a", encoding='utf8') as f:
             for content in df['comment'].values:
                 f.write(content + '\n')
 
