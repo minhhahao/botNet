@@ -1,14 +1,12 @@
 # tob
-
-A chatbot that will talk to you when it sees you
-
+_Some related links:_
 - [Logs](docs/Logs.md)
 
 ## Plans
 
 - Using Reddit comments from [pushshift.io](https://files.pushshift.io/reddit/comments/) as dataset
-- Implements [Tensorflow NMT](https://github.com/tensorflow/nmt) (Neural Machine Translation) for training the chatbot (currently working)
-- Implements Convolutional Neural Network model for object detection YOLOv3 (in the future)
+  - Currently using data from _2010-10_
+- Implements [Tensorflow NMT](https://github.com/tensorflow/nmt) (Neural Machine Translation) for training the chatbot (_currently working_)
 
 ## Woking in progress
 

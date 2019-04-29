@@ -65,4 +65,7 @@ _Problem 3_: creating _training_data_
   - Therefore I need to create a .from file (txt file) to a .to file (txt file) using the from the rows of the database so that the model can have a base to train => therefore I create a `training.py` to create training data. Inside the file include simple writing files and some SQl queries
 
 ## Week 3: Learning NMT
-- I haven't spent a lot of time writing code this past week because I had to work on the English provincial exam. Nonetheless,
+- I haven't spent a lot of time writing code this past week because I had to work on the English provincial exam. Nonetheless, I worked on NMT (_Neural Machine Translation_) based on [tensorflow's NMT](https://github.com/tensorflow/nmt), a _many-to-many_ implementation of _Recurrent Neural Network_, or often known as _RNN_
+- Some of the links that I used during the past week:
+  - [Basis of RNN and LSTMs (Long Short Term Memory)](https://colah.github.io/posts/2015-08-Understanding-LSTMs/)
+  - [Tensorflow's RNN Tutorial](https://www.tensorflow.org/tutorials/sequences/recurrent)
