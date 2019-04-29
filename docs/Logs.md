@@ -69,3 +69,4 @@ _Problem 3_: creating _training_data_
 - Some of the links that I used during the past week:
   - [Basis of RNN and LSTMs (Long Short Term Memory)](https://colah.github.io/posts/2015-08-Understanding-LSTMs/)
   - [Tensorflow's RNN Tutorial](https://www.tensorflow.org/tutorials/sequences/recurrent)
+  - [Papers](docs/RNN_LearningPhraseRepresentation.pdf)
