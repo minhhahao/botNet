@@ -72,3 +72,10 @@ _Problem 3_: creating _training_data_
   - [Tensorflow's RNN Tutorial](https://www.tensorflow.org/tutorials/sequences/recurrent)
   - [Learning Phrase Representation using RNN Enconder-Decoder](docs/RNN_LearningPhraseRepresentation.pdf)
   - [seq2seq using RNN](docs/5346-sequence-to-sequence-learning-with-neural-networks.pdf)
+
+## Week 4: Building the model
+- Tokenise the language since the model cannot recognize word by itself ==> separate by space
+==> encoder will do (tokenise) ==> create a word "vector" (same word might have the same vector) ==> feed through RNN (LSTM with GRU cells) ==> decoder ==> target output
+- Padding fixes the different length for different token (include pad token "</s>")
+  - problems: creating gibberis word at the end if the model learned about the padding (useless)
+  ==> DRNN
