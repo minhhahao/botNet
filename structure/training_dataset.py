@@ -25,21 +25,21 @@ for timeframe in tf:
         cur_length = len(df)
 
         if not test_done:
-            with open(tpath / "tst{}.from".format(timeframe), "a", encoding='utf8') as f:
+            with open(tpath / "tst.from", "a", encoding='utf8') as f:
                 for content in df['parent'].values:
                     f.write(content + '\n')
 
-            with open(tpath / "tst{}.to".format(timeframe), "a", encoding='utf8') as f:
+            with open(tpath / "tst.to", "a", encoding='utf8') as f:
                 for content in df['comment'].values:
                     f.write(str(content) + '\n')
 
             test_done = True
 
         else:
-            with open(tpath / "tr{}.from".format(timeframe), "a", encoding='utf8') as f:
+            with open(tpath / "tr.from", "a", encoding='utf8') as f:
                 for content in df['parent'].values:
                     f.write(content + '\n')
-            with open(tpath / "tr{}.to".format(timeframe), "a", encoding='utf8') as f:
+            with open(tpath / "tr.to", "a", encoding='utf8') as f:
                 for content in df['comment'].values:
                     f.write(str(content) + '\n')
 
