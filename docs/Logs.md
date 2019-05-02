@@ -79,3 +79,4 @@ _Problem 3_: creating _training_data_
 - Padding fixes the different length for different token (include pad token "</s>")
   - problems: creating gibberis word at the end if the model learned about the padding (useless)
   ==> DRNN
+- Something pops up ==> the database is broken with SQLite3 when there are too much data ==> might have to try other way
