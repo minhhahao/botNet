@@ -73,10 +73,29 @@ _Problem 3_: creating _training_data_
   - [Learning Phrase Representation using RNN Enconder-Decoder](docs/RNN_LearningPhraseRepresentation.pdf)
   - [seq2seq using RNN](docs/5346-sequence-to-sequence-learning-with-neural-networks.pdf)
 
-## Week 4: Building the model
+## Week 4: Building the model ==> Rebuilding database
 - Tokenise the language since the model cannot recognize word by itself ==> separate by space
 ==> encoder will do (tokenise) ==> create a word "vector" (same word might have the same vector) ==> feed through RNN (LSTM with GRU cells) ==> decoder ==> target output
 - Padding fixes the different length for different token (include pad token "</s>")
   - problems: creating gibberis word at the end if the model learned about the padding (useless)
   ==> DRNN
 - Something pops up ==> the database is broken with SQLite3 when there are too much data ==> might have to try other way
+- working with mongodb atm
+Problem 1: accessing the database after uploads: after uploading RAW JSON file to the local mongoDB, I need to access the data so that I can carry on with the cleaning
+- code :
+```python
+from pymongo import MongoClient
+from pprint import pprint
+
+client = MongoClient("mongodb://root:toor@127.0.0.1:27017/RC-2010_10")
+db = client.admin
+serverStatusResult=db.command("serverStatus")
+pprint(serverStatusResult)
+```
+However, the output returns `command serverStatus requires authentication`. I found out a solution for this problem from [this](https://stackoverflow.com/questions/40346767/pymongo-auth-failed-in-python-script) that you have to specify info in the the connection string __"mongodb://root:toor@127.0.0.1:27017/RC-2010_10"__
+
+Problem 2: Connecting to Database
+- one of the main idea of mongoDB is that you can connect to a database through localhost. However, this has cause a lot more trouble than native SQLite3 as SQL deals with the database locally. The problem here is to create a pointer that can connect to the designated database, suggested by [this post](https://docs.mongodb.com/guides/server/read_queries/). The output returns `type object 'MongoClient' has no attribute 'RC_2010'`, which leads me through this [post](https://www.mongodb.com/blog/post/getting-started-with-python-and-mongodb) to fix the problem
+ Problem 3: MongoDB sucks
+ - I switched to numpy/pandas
+ - uses ijson instead of json becuase json will iterates through the whole json file at once (in which not good for big data)
