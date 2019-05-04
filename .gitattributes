@@ -9,3 +9,4 @@
 >>>>>>> 1a87f85de6d85d1545a76f3befdf5e9024e376b8
 *.to filter=lfs diff=lfs merge=lfs -text
 *.from filter=lfs diff=lfs merge=lfs -text
+*.txt* filter=lfs diff=lfs merge=lfs -text
