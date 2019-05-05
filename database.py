@@ -1,47 +1,74 @@
 '''
-    Processing data from Reddit Comment (http://files.pushshift.io/reddit/comments/)
-    Database of choice: Pandas
+    Processing data from http://files.pushshift.io/reddit/comments/
+    Database of choice: Pandas / MongoDB
 '''
 import pandas as pd
-import json
-import os.path
-
-# Init
-# '2010-01', '2010-10', '2015-01'
-global timeframe
-timeframe = '2015-01'
-data_dir = os.path.join(os.getcwd(), 'database', 'RC',
-                        "RC_{}.json".format(timeframe))
-output_dir = os.path.join(os.getcwd(), 'database', 'output',
-                          'RC_{}.txt'.format(timeframe))
-output_file = open(output_dir, 'w+', encoding="utf-8")
+import os
+from datetime import datetime
+from pymongo import MongoClient
 
 
-def create_table():
-    global db
-    # Processing the data
-    with open(data_dir) as json_file:
-        data = json_file.readlines()
-        data = list(map(json.loads, data))
-    df = pd.DataFrame(data)
+class handler():
+    # path
+    output_dir = ''
 
-    # Filter out necessary data array
+    # important column
     cols_to_keep = ["parent_id", "created_utc",
                     "subreddit_id", "score", "body", "name"]
-    db = df.drop(df.columns.difference(cols_to_keep), axis=1)
-    # Filter array for comment
-    db = db[~db['body'].isin(['[deleted]', '[removed]'])]
-    # Drop all the comment that have a score < 0
-    db.drop(db[db['score'] < 3].index, inplace=True)
-    # Remove special character from comments
-    db = db.replace('\n', '', regex=True)
 
+    # timeframe for RC
+    # timeframe = ['2010-01', '2010-10', '2015-01']
+    timeframe = '2010-01'
 
-def output():
-    database = db['body']
-    database.to_csv(output_file, sep=' ', index=False, header=False)
+    def __init__(self):
+        self.output_dir = os.path.join(os.getcwd(), 'database', 'output')
 
+    def read_mongo(database, collection, query={}, host='localhost', port=27017, username=None, password=None, no_id=True):
+        '''
+        Usage: Read query from MongoDB then put into Pandas DataFrame
+        '''
+        # Connect to MongoDB
+        conn = MongoClient(host=host, port=port, username=username,
+                           password=password, authSource="Admin")
+        db = conn['database']
 
-if __name__ == "__main__":
-    create_table()
-    output()
+        # Make query to MongoDB
+        cur = db.collection.find(query)
+
+        # Expand the cursor and construct pd DataFrame
+        df = pd.DataFrame(list(cur))
+
+        # Delete _id that exists for each document in MongoDB
+        if no_id:
+            del df['id']
+
+        return df
+
+    def process_data(self):
+        db = self.read_mongo()
+        column = self.cols_to_keep
+        # Filter out necessary data array
+        df = db.drop(db.columns.difference(column), axis=1)
+        # Filter array for comment
+        df = df[~df['body'].isin(['[deleted]', '[removed]'])]
+        # Drop all the comment that have a score < 0
+        df.drop(df[df['score'] < 3].index, inplace=True)
+        # Remove special character from comments
+        df = df.replace('\n', '', regex=True)
+        print("Finished creating DB @ " + str(datetime.now()))
+        return df
+
+    def training_data(self, output_file, comments=['body']):
+        database = self.read_mongo()
+        bd = database[comments]
+        if not os.path.exists(output_file):
+            print("Writing output file @ " + str(datetime.now()))
+            with open(output_file, 'a', encoding="utf-8") as output:
+                bd.to_csv(output, sep=' ', index=False, header=False)
+
+    if __name__ == '__main__':
+        read_mongo('RC', 2010 - 10, {}, host='localhost', port= 27017,
+                   username='root', password='toor', no_id=True)
+        process_data()
+        training_data(os.path.join(
+            os.getcwd(), 'database', 'output', 'db.txt'))
