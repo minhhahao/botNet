@@ -37,21 +37,19 @@ class dataHandler():
         # Input the data
         print("Begin Processing @ " + str(datetime.now()))
         db = pd.DataFrame()
-        basepath = os.path.dirname(os.path.abspath(__file__))
         if os.path.getsize(file) > 5e9:
             os.system('sh database/process_big_data.sh')
             for index, js in enumerate(tmp_dict):
-                path = basepath + "/" + str(os.path.join(tmp_path, js))
-                # with open(str(os.path.join(tmp_path, js)), encoding='utf-8') as json_file:
-                js_text = pd.read_json(path, lines=True)
-                parent_id = js_text['parent_id']
-                created_utc = js_text['created_utc']
-                subreddit_id = js_text['subreddit_id']
-                score = js_text['score']
-                body = js_text['body']
-                name = js_text['name']
-                db.loc[index] = [parent_id, created_utc,
-                                 subreddit_id, score, body, name]
+                with open(str(os.path.join(tmp_path, js)), encoding='utf-8') as json_file:
+                    js_text = json.load(json_file, encoding='utf-8')
+                    parent_id = js_text['parent_id']
+                    created_utc = js_text['created_utc']
+                    subreddit_id = js_text['subreddit_id']
+                    score = js_text['score']
+                    body = js_text['body']
+                    name = js_text['name']
+                    db.loc[index] = [parent_id, created_utc,
+                                     subreddit_id, score, body, name]
         else:
             with open(file, 'r') as json_file:
                 for r in json_file:
@@ -64,7 +62,7 @@ class dataHandler():
                     name = row['name']
                 db = pd.DataFrame(
                     columns=[parent_id, created_utc, subreddit_id, score, body, name])
-        # A way to remove unecessary data from a dict
+        # A way to remove unecessary data from a directory
         # db = db.drop(db.columns.difference(important_col), axis=1)
         # Filter array for comment
         db = db[~db[body].isin(['[deleted]', '[removed]'])]
