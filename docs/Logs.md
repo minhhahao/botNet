@@ -1,7 +1,7 @@
 # Logs
 - [Week 1 - 2](#week-1---2-creating-database)
 - [Week 3](#week-3-learning-nmt)
-- [Week 4](#week-4-building-the-model-=-=->--rebuilding-database)
+- [Week 4](#week-4-building-the-model--rebuilding-database)
 ## Week 1 - 2: Creating database
 
 -   In order to create a chatbot, I will need to build a training database for the chatbot, I decide to use Reddit data dump from [pushshift.io](https://files.pushshift.io/reddit/comments/). Current using _2010-10_
@@ -93,14 +93,14 @@ _Problem 3_: creating _training_data_
     serverStatusResult=db.command("serverStatus")
     pprint(serverStatusResult)
     ```
-    However, the output returns `command serverStatus requires authentication`. I found out a solution for this problem from [this](https://stackoverflow.com/questions/40346767/pymongo-auth-failed-in-python-script) that you have to specify info in the the connection string __"mongodb://root:toor@127.0.0.1:27017/RC-2010_10"__
+    However, the output returns `command serverStatus requires authentication`. I found out a solution for this problem from [this](https://stackoverflow.com/questions/40346767/pymongo-auth-failed-in-python-script) that you have to specify info in the the connection string using the format _"mongodb://username:password@host:port/database"_
 
   - _Problem 2: Connecting to Database_
     One of the main idea of mongoDB is that you can connect to a database through localhost. However, this has cause a lot more trouble than native SQLite3 as SQL deals with the database locally. The problem here is to create a pointer that can connect to the designated database, suggested by [this post](https://docs.mongodb.com/guides/server/read_queries/). The output returns `type object 'MongoClient' has no attribute 'RC_2010'`, which leads me through this [post](https://www.mongodb.com/blog/post/getting-started-with-python-and-mongodb) to fix the problem
 
   - _Notes_: The main problem is the way MongoDB stores (data)[https://stackoverflow.com/questions/4127386/how-is-the-data-in-a-mongodb-database-stored-on-disk], in forms of `document`, instead of normal Database Management System (DBMS) like SQLite3. (Comparison)[https://db-engines.com/en/system/MongoDB%3BSQLite] can be found in the link above. I spent a whole Friday afternoon without going anywhere. Therefore, I decided to switch to 2nd solution
 
-- _Solution 2_ : Instead of processing the big file as a whole, I might truncate that file into smaller file and then process it in [database/temp](database/temp)
+- _Solution 2_ : Instead of processing the big file as a whole, I might truncate that file into smaller file and then process it in `database/temp`
   - I decide to use `pandas` since I have some experience working with pandas during the summer
   - _Problem 2.1_ : Split the big files
     Since it is not reasonable to write a chunk of codes in `python` to split a big file, I wrote a `bash` file to do the job. From (this)[https://stackoverflow.com/questions/5920333/how-to-check-size-of-a-file] and (this)[https://unix.stackexchange.com/questions/87456/shell-script-to-check-for-the-presence-of-one-or-more-files-with-a-specific-exte] I learned how to check a size of a file written in `bash` as well as writing a segment that can stop the code from doing nothing if there are already file inside the `temp` folder. This refers to [**big_data.sh**](big_data.sh)
