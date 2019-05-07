@@ -1,6 +1,6 @@
 # tob
 _Some related links:_
-- [Logs](Logs.md)
+- [Logs](LOGS.md)
 - [Docs](docs)
 
 ## Plans
