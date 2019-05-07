@@ -5,8 +5,49 @@
 from datetime import datetime
 import pandas as pd
 import os
-import glob
-import json
+import fnmatch
+
+
+class Processor():
+    '''
+        Usage: Do all the dirty jobs
+        Since json cannot load a big JSON file into RAM, split the file into smaller chunk using big_data.sh
+    '''
+    # Directory Settings
+    reddit_comment_dir = ' '
+    temporary_json_dir = ' '
+    output_dir = ' '
+
+    # Array of String indicates location of tmp file
+    tmp_arr = []
+
+    # timeframe for different RC : 201010,201001, 201501,201601. [default]: 201601 (processing big data)
+    timeframe = 201601
+
+    def __init__(self, database, tf=None):
+        if os.path.exists(database):
+            # Set string paths
+            self.reddit_comment_dir = database + "/RC/"
+            self.temporary_json_dir = database + "/temp/"
+            self.output_dir = database + "/output/"
+            self.timeframe = tf
+
+            # Walking tmp_array for big data processing
+            self.tmp_arr = list(pos_json for pos_json in os.listdir(
+                self.temporary_json_dir) if pos_json.endswith('.json'))
+        else:
+            print("Invalid directory! Terminated @ " + str(datetime.now()))
+
+    def checkSize(self, tf=None, exceed = False):
+        # Checking the size of the current working file that match with timeframe, whether it exceeds RAM or not
+        current_working_file = str(file for file in os.listdir(
+            self.reddit_comment_dir) if fnmatch.fnmatch(file, 'RC_{}.json'.format(tf)))
+        if os.path.getsize(current_working_file) > 5e9:
+            os.system('sh big_data.sh')
+        else:
+            print("File doesn't exceed RAM size")
+
+    def process():
 
 
 class dataHandler():

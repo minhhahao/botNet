@@ -104,4 +104,4 @@ _Problem 3_: creating _training_data_
   - I decide to use `pandas` since I have some experience working with pandas during the summer
   - _Problem 2.1_ : Split the big files
     Since it is not reasonable to write a chunk of codes in `python` to split a big file, I wrote a `bash` file to do the job. From (this)[https://stackoverflow.com/questions/5920333/how-to-check-size-of-a-file] and (this)[https://unix.stackexchange.com/questions/87456/shell-script-to-check-for-the-presence-of-one-or-more-files-with-a-specific-exte] I learned how to check a size of a file written in `bash` as well as writing a segment that can stop the code from doing nothing if there are already file inside the `temp` folder. This refers to [**big_data.sh**](big_data.sh)
-  - _Problem 2.2_ : File I/O in python
+  - _Problem 2.2_ : File I/O in `python`
