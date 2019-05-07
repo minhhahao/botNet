@@ -38,16 +38,16 @@ class Processor():
         else:
             print("Invalid directory! Terminated @ " + str(datetime.now()))
 
-    def checkSize(self, tf=None, exceed = False):
+    def checkSize(self, tf=None):
         # Checking the size of the current working file that match with timeframe, whether it exceeds RAM or not
         current_working_file = str(file for file in os.listdir(
             self.reddit_comment_dir) if fnmatch.fnmatch(file, 'RC_{}.json'.format(tf)))
         if os.path.getsize(current_working_file) > 5e9:
-            os.system('sh big_data.sh')
+            os.system('sh database/big_data.sh')
         else:
-            print("File doesn't exceed RAM size")
+            return True
 
-    def process():
+    def process(self, ):
 
 
 class dataHandler():
