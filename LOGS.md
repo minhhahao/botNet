@@ -105,3 +105,16 @@ _Problem 3_: creating _training_data_
   - _Problem 2.1_ : Split the big files
     Since it is not reasonable to write a chunk of codes in `python` to split a big file, I wrote a `bash` file to do the job. From (this)[https://stackoverflow.com/questions/5920333/how-to-check-size-of-a-file] and (this)[https://unix.stackexchange.com/questions/87456/shell-script-to-check-for-the-presence-of-one-or-more-files-with-a-specific-exte] I learned how to check a size of a file written in `bash` as well as writing a segment that can stop the code from doing nothing if there are already file inside the `temp` folder. This refers to [**big_data.sh**](database/big_data.sh)
   - _Problem 2.2_ : File I/O in `python`
+    In order to run a `sh` file in python, I learned that I need to use `os.system` to run command from the prompt. An example looks like this:
+    ```python
+    os.system('sh database/big_data.sh')
+     ```
+  - _Problem 2.3_ : Processing database
+    This refers to [**data.py**](data.py)
+    - _2.3.1_: Working with multiple JSON file in a directory in python for processing big data
+      - In order to create a DataFrame from multiple JSON file, I use use `os.listdir()` and then put the output into a `tmp_file_arr` to run a `for` loop through it to read the file
+      ```python
+      current_working_file = str(file for file in os.listdir(
+              self.reddit_comment_dir) if fnmatch.fnmatch(file, 'RC_{}.json'.format(tf)))
+      ``` with tf: timeframe of the current working RC
+      
