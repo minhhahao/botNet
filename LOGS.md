@@ -74,11 +74,11 @@ _Problem 3_: creating _training_data_
   - [Learning Phrase Representation using RNN Enconder-Decoder](docs/RNN_LearningPhraseRepresentation.pdf)
   - [seq2seq using RNN](docs/5346-sequence-to-sequence-learning-with-neural-networks.pdf)
 
-## Week 4: Building the model ==> Rebuilding database
+## Week 4: Building the model ⇒ Rebuilding database
 - __NMT__:
-  - Tokenise the language since the model cannot recognize word by itself ==> separate by space ==> encoder will do (tokenise) ==> create a word "vector" (same word might have the same vector) ==> feed through RNN (LSTM with GRU cells) ==> decoder ==> target output
-  - Padding fixes the different length for different token (include pad token "</s>" ==> will create gibberis word at the end if the model learned about the padding (useless) ==> DRNN
-- Something pops up ==> the `data.py` crashes when loads big file data since `json.loads` puts every file into RAM (`json.loads` returns Memory Error when parsing big data file)
+  - Tokenise the language since the model cannot recognize word by itself ⇒ separate by space ⇒ encoder will do (tokenise) ⇒ create a word "vector" (same word might have the same vector) ⇒ feed through RNN (LSTM with GRU cells) ⇒ decoder ⇒ target output
+  - Padding fixes the different length for different token (include pad token "</s>" ⇒ will create gibberis word at the end if the model learned about the padding (useless) ⇒ DRNN
+- Something pops up ⇒ the `data.py` crashes when loads big file data since `json.loads` puts every file into RAM (`json.loads` returns Memory Error when parsing big data file)
 
 - _Solution 1_ : Loading everything to MongoDB and then pull data from MongoDB `document` into DataFrame
 
@@ -88,7 +88,7 @@ _Problem 3_: creating _training_data_
     from pymongo import MongoClient
     from pprint import pprint
 
-    client = MongoClient("mongodb://root:toor@127.0.0.1:27017/RC-2010_10")
+    client = MongoClient("mongodb://username:password@host:port/RC-2010_10")
     db = client.admin
     serverStatusResult=db.command("serverStatus")
     pprint(serverStatusResult)
@@ -98,7 +98,7 @@ _Problem 3_: creating _training_data_
   - _Problem 2: Connecting to Database_
     One of the main idea of mongoDB is that you can connect to a database through localhost. However, this has cause a lot more trouble than native SQLite3 as SQL deals with the database locally. The problem here is to create a pointer that can connect to the designated database, suggested by [this post](https://docs.mongodb.com/guides/server/read_queries/). The output returns `type object 'MongoClient' has no attribute 'RC_2010'`, which leads me through this [post](https://www.mongodb.com/blog/post/getting-started-with-python-and-mongodb) to fix the problem
 
-  - _Notes_: The main problem is the way MongoDB stores (data)[https://stackoverflow.com/questions/4127386/how-is-the-data-in-a-mongodb-database-stored-on-disk], in forms of `document`, instead of normal Database Management System (DBMS) like SQLite3. (Comparison)[https://db-engines.com/en/system/MongoDB%3BSQLite] can be found in the link above. I spent a whole Friday afternoon without going anywhere. Therefore, I decided to switch to 2nd solution
+  - _Notes_: The main problem is the way MongoDB stores [data](https://stackoverflow.com/questions/4127386/how-is-the-data-in-a-mongodb-database-stored-on-disk), in forms of `document`, instead of normal Database Management System (DBMS) like SQLite3. (Comparison)[https://db-engines.com/en/system/MongoDB%3BSQLite] can be found in the link above. I spent a whole Friday afternoon without going anywhere. Therefore, I decided to switch to 2nd solution
 
 - _Solution 2_ : Instead of processing the big file as a whole, I might truncate that file into smaller file and then process it in `database/temp`
   - I decide to use `pandas` since I have some experience working with pandas during the summer
@@ -117,4 +117,3 @@ _Problem 3_: creating _training_data_
       current_working_file = str(file for file in os.listdir(
               self.reddit_comment_dir) if fnmatch.fnmatch(file, 'RC_{}.json'.format(tf)))
       ``` with tf: timeframe of the current working RC
-      
