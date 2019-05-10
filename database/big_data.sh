@@ -1,7 +1,7 @@
 #! /bin/bash
 
 # output tmp file
-outputfile=/home/aar0npham/Documents/Coding/tob/database/temp/RC-
+outputfile=/home/aar0npham/Documents/Coding/tob/database/temp/RC/RC-
 # The amount of RAM in byte
 max=16000000000
 
