@@ -19,7 +19,7 @@ class tob:
 
     def _create_placeholders(self):
         # Feeds for inputs. It's a list of placeholders
-        print('Create placeholders')
+        print('Creating placeholders...')
         self.encoder_inputs = [tf.placeholder(tf.int32, shape=[None], name='encoder{}'.format(i))
                                for i in range(config.BUCKETS[-1][0])]
         self.decoder_inputs = [tf.placeholder(tf.int32, shape=[None], name='decoder{}'.format(i))

@@ -23,13 +23,14 @@ TESTSET_SIZE = 25000
 
 BUCKETS = [(19, 19), (28, 28), (33, 33), (40, 43), (50, 53), (60, 63)]
 
-
+'''
 CONTRACTIONS = [("i ' m ", "i 'm "), ("' d ", "'d "), ("' s ", "'s "),
                 ("don ' t ", "do n't "), ("didn ' t ",
                                           "did n't "), ("doesn ' t ", "does n't "),
                 ("can ' t ", "ca n't "), ("shouldn ' t ",
                                           "should n't "), ("wouldn ' t ", "would n't "),
                 ("' ve ", "'ve "), ("' re ", "'re "), ("in ' ", "in' ")]
+'''
 
 NUM_LAYERS = 3
 HIDDEN_SIZE = 256
