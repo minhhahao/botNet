@@ -30,7 +30,7 @@ CONTRACTIONS = [("i ' m ", "i 'm "), ("' d ", "'d "), ("' s ", "'s "),
                                           "should n't "), ("wouldn ' t ", "would n't "),
                 ("' ve ", "'ve "), ("' re ", "'re "), ("in ' ", "in' ")]
 
-NUM_LAYERS = 3
+NUM_LAYERS = 10
 HIDDEN_SIZE = 256
 BATCH_SIZE = 64
 
@@ -38,5 +38,5 @@ LR = 0.5
 MAX_GRAD_NORM = 5.0
 
 NUM_SAMPLES = 512
-ENC_VOCAB = 24484
-DEC_VOCAB = 24577
+ENC_VOCAB = 24222
+DEC_VOCAB = 24638
