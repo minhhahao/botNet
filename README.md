@@ -14,4 +14,4 @@ _Some related links:_
 -   [x] Processing RAW JSON file
 -   [x] Finish the database
 -   [x] Setting up training dataset
--   [ ] Creating training model from scratch with [tensorflow/nmt](https://github.com/tensorflow/nmt)
+-   [x] Creating training model from scratch with [tensorflow/nmt](https://github.com/tensorflow/nmt)

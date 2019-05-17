@@ -91,8 +91,7 @@ def make_dir(path):
 
 
 def basic_tokenizer(line, normalize_digits=True):
-    """ A basic tokenizer to tokenize text into tokens.
-    Feel free to change this to suit your need. """
+    """ A basic tokenizer to tokenize text into tokens."""
     line = re.sub('<u>', '', line)
     line = re.sub('</u>', '', line)
     line = re.sub('\[', '', line)

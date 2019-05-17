@@ -1,3 +1,6 @@
+'''
+Implements Tensorflow NMT model with seq2seq
+'''
 import time
 
 import tensorflow as tf
@@ -7,7 +10,8 @@ import config
 
 class tob:
     def __init__(self, forward_only, batch_size):
-        """forward_only: if set, we do not construct the backward pass in the model.
+        """
+            forward_only: if set, DO NOT construct the backward pass in the model.
         """
         print('Initialize new model')
         self.fw_only = forward_only
@@ -23,23 +27,22 @@ class tob:
         self.decoder_masks = [tf.placeholder(tf.float32, shape=[None], name='mask{}'.format(i))
                               for i in range(config.BUCKETS[-1][1] + 1)]
 
-        # Our targets are decoder inputs shifted by one (to ignore <GO> symbol)
+        # targets : decoder inputs shifted by one (to ignore <GO> symbol)
         self.targets = self.decoder_inputs[1:]
 
     def _inference(self):
-        print('Create inference')
-        # If we use sampled softmax, we need an output projection.
-        # Sampled softmax only makes sense if we sample less than vocabulary size.
+        print('Creating inference...')
+        # If we use sampled softmax, we need an output projection. (sample < vocab size)
         if config.NUM_SAMPLES > 0 and config.NUM_SAMPLES < config.DEC_VOCAB:
-            w = tf.get_variable(
+            weight = tf.get_variable(
                 'proj_w', [config.HIDDEN_SIZE, config.DEC_VOCAB])
-            b = tf.get_variable('proj_b', [config.DEC_VOCAB])
-            self.output_projection = (w, b)
+            bias = tf.get_variable('proj_b', [config.DEC_VOCAB])
+            self.output_projection = (weight, bias)
 
         def sampled_loss(logits, labels):
             labels = tf.reshape(labels, [-1, 1])
-            return tf.nn.sampled_softmax_loss(weights=tf.transpose(w),
-                                              biases=b,
+            return tf.nn.sampled_softmax_loss(weights=tf.transpose(weight),
+                                              biases=bias,
                                               inputs=logits,
                                               labels=labels,
                                               num_sampled=config.NUM_SAMPLES,
@@ -51,7 +54,7 @@ class tob:
             [single_cell for _ in range(config.NUM_LAYERS)])
 
     def _create_loss(self):
-        print('Creating loss... \nIt might take a couple of minutes depending on how many buckets you have.')
+        print('Creating loss...')
         start = time.time()
 
         def _seq2seq_f(encoder_inputs, decoder_inputs, do_decode):
@@ -93,8 +96,8 @@ class tob:
                 softmax_loss_function=self.softmax_loss_function)
         print('Time:', time.time() - start)
 
-    def _creat_optimizer(self):
-        print('Create optimizer... \nIt might take a couple of minutes depending on how many buckets you have.')
+    def _create_optimizer(self):
+        print('Creating optimizer...')
         with tf.variable_scope('training') as scope:
             self.global_step = tf.Variable(
                 0, dtype=tf.int32, trainable=False, name='global_step')
@@ -124,5 +127,5 @@ class tob:
         self._create_placeholders()
         self._inference()
         self._create_loss()
-        self._creat_optimizer()
+        self._create_optimizer()
         self._create_summary()
