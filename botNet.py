@@ -11,7 +11,7 @@ import config
 class tob:
     def __init__(self, forward_only, batch_size):
         """
-            forward_only: if set, DO NOT construct the backward pass in the model.
+        forward_only: if set, we do not construct the backward pass in the model.
         """
         print('Initialize new model')
         self.fw_only = forward_only
@@ -19,7 +19,7 @@ class tob:
 
     def _create_placeholders(self):
         # Feeds for inputs. It's a list of placeholders
-        print('Creating placeholders...')
+        print('Create placeholders')
         self.encoder_inputs = [tf.placeholder(tf.int32, shape=[None], name='encoder{}'.format(i))
                                for i in range(config.BUCKETS[-1][0])]
         self.decoder_inputs = [tf.placeholder(tf.int32, shape=[None], name='decoder{}'.format(i))
@@ -27,22 +27,23 @@ class tob:
         self.decoder_masks = [tf.placeholder(tf.float32, shape=[None], name='mask{}'.format(i))
                               for i in range(config.BUCKETS[-1][1] + 1)]
 
-        # targets : decoder inputs shifted by one (to ignore <GO> symbol)
+        # Our targets are decoder inputs shifted by one (to ignore <GO> symbol)
         self.targets = self.decoder_inputs[1:]
 
     def _inference(self):
-        print('Creating inference...')
-        # If we use sampled softmax, we need an output projection. (sample < vocab size)
+        print('Create inference')
+        # If we use sampled softmax, we need an output projection.
+        # Sampled softmax only makes sense if sample less than vocabulary size.
         if config.NUM_SAMPLES > 0 and config.NUM_SAMPLES < config.DEC_VOCAB:
-            weight = tf.get_variable(
+            w = tf.get_variable(
                 'proj_w', [config.HIDDEN_SIZE, config.DEC_VOCAB])
-            bias = tf.get_variable('proj_b', [config.DEC_VOCAB])
-            self.output_projection = (weight, bias)
+            b = tf.get_variable('proj_b', [config.DEC_VOCAB])
+            self.output_projection = (w, b)
 
         def sampled_loss(logits, labels):
             labels = tf.reshape(labels, [-1, 1])
-            return tf.nn.sampled_softmax_loss(weights=tf.transpose(weight),
-                                              biases=bias,
+            return tf.nn.sampled_softmax_loss(weights=tf.transpose(w),
+                                              biases=b,
                                               inputs=logits,
                                               labels=labels,
                                               num_sampled=config.NUM_SAMPLES,
@@ -54,7 +55,7 @@ class tob:
             [single_cell for _ in range(config.NUM_LAYERS)])
 
     def _create_loss(self):
-        print('Creating loss...')
+        print('Creating loss... \nIt might take a couple of minutes depending on how many buckets you have.')
         start = time.time()
 
         def _seq2seq_f(encoder_inputs, decoder_inputs, do_decode):
@@ -97,7 +98,7 @@ class tob:
         print('Time:', time.time() - start)
 
     def _create_optimizer(self):
-        print('Creating optimizer...')
+        print('Create optimizer... \nIt might take a couple of minutes depending on how many buckets you have.')
         with tf.variable_scope('training') as scope:
             self.global_step = tf.Variable(
                 0, dtype=tf.int32, trainable=False, name='global_step')

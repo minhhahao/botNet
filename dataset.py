@@ -245,7 +245,7 @@ def get_batch(data_bucket, bucket_id, batch_size=1):
     batch_decoder_inputs = _reshape_batch(
         decoder_inputs, decoder_size, batch_size)
 
-    # create decoder_masks to be 0 for decoders that are padding.
+    # create decoder_masks to be 0 for decoders that are padding. (Create decode weights)
     batch_masks = []
     for length_id in range(decoder_size):
         batch_mask = np.ones(batch_size, dtype=np.float32)
