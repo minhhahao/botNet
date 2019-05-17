@@ -4,19 +4,20 @@
 import os
 
 # parameters for processing the dataset
-DB_PATH = os.path.join(os.getcwd(), 'database', 'cornell_movie_dialogs_corpus')
+FILE_DIR = str(os.path.join(os.getcwd(), 'database',
+                            'cornell_movie_dialogs_corpus'))
 CONVO_FILE = 'movie_conversations.txt'
 LINE_FILE = 'movie_lines.txt'
-OUTPUT_FILE = os.path.join(os.getcwd(), 'database', 'output.txt')
-PROCESSED = os.path.join('database', 'processed')
+OUTPUT_FILE = 'output.txt'
+PROCESSED_PATH = str(os.path.join(os.getcwd(), 'database', 'processed'))
 CPT_PATH = 'checkpoints'
 
 THRESHOLD = 2
 
-PAD = 0
-UNK = 1
-START = 2
-EOS = 3
+PAD_ID = 0
+UNK_ID = 1
+START_ID = 2
+EOS_ID = 3
 
 TESTSET_SIZE = 25000
 
@@ -30,7 +31,7 @@ CONTRACTIONS = [("i ' m ", "i 'm "), ("' d ", "'d "), ("' s ", "'s "),
                                           "should n't "), ("wouldn ' t ", "would n't "),
                 ("' ve ", "'ve "), ("' re ", "'re "), ("in ' ", "in' ")]
 
-NUM_LAYERS = 10
+NUM_LAYERS = 3
 HIDDEN_SIZE = 256
 BATCH_SIZE = 64
 
@@ -38,5 +39,7 @@ LR = 0.5
 MAX_GRAD_NORM = 5.0
 
 NUM_SAMPLES = 512
-ENC_VOCAB = 24222
-DEC_VOCAB = 24638
+ENC_VOCAB = 24458
+DEC_VOCAB = 24605
+ENC_VOCAB = 24454
+DEC_VOCAB = 24655
