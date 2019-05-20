@@ -3,6 +3,7 @@ Implements Tensorflow NMT model with seq2seq
 '''
 import time
 
+import numpy as np
 import tensorflow as tf
 
 import config
@@ -10,8 +11,7 @@ import config
 
 class tob:
     def __init__(self, forward_only, batch_size):
-        """
-        forward_only: if set, we do not construct the backward pass in the model.
+        """forward_only: if set, we do not construct the backward pass in the model.
         """
         print('Initialize new model')
         self.fw_only = forward_only
@@ -33,7 +33,7 @@ class tob:
     def _inference(self):
         print('Create inference')
         # If we use sampled softmax, we need an output projection.
-        # Sampled softmax only makes sense if sample less than vocabulary size.
+        # Sampled softmax only makes sense if we sample less than vocabulary size.
         if config.NUM_SAMPLES > 0 and config.NUM_SAMPLES < config.DEC_VOCAB:
             w = tf.get_variable(
                 'proj_w', [config.HIDDEN_SIZE, config.DEC_VOCAB])
@@ -97,7 +97,7 @@ class tob:
                 softmax_loss_function=self.softmax_loss_function)
         print('Time:', time.time() - start)
 
-    def _create_optimizer(self):
+    def _creat_optimizer(self):
         print('Create optimizer... \nIt might take a couple of minutes depending on how many buckets you have.')
         with tf.variable_scope('training') as scope:
             self.global_step = tf.Variable(
@@ -128,5 +128,5 @@ class tob:
         self._create_placeholders()
         self._inference()
         self._create_loss()
-        self._create_optimizer()
+        self._creat_optimizer()
         self._create_summary()

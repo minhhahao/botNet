@@ -1,9 +1,9 @@
 '''
-    tob (him/her)self
+    bot (him/her)self
 '''
-import dataset
+import data
 import config
-from botNet import tob
+from model import tob
 
 import tensorflow as tf
 import numpy as np
@@ -81,8 +81,8 @@ def _get_buckets():
     train_buckets_scale is the inverval that'll help us
     choose a random bucket later on.
     """
-    test_buckets = dataset.load_data('test_ids.enc', 'test_ids.dec')
-    data_buckets = dataset.load_data('train_ids.enc', 'train_ids.dec')
+    test_buckets = data.load_data('test_ids.enc', 'test_ids.dec')
+    data_buckets = data.load_data('train_ids.enc', 'train_ids.dec')
     train_bucket_sizes = [len(data_buckets[b])
                           for b in range(len(config.BUCKETS))]
     print("Number of samples in each bucket:\n", train_bucket_sizes)
@@ -119,9 +119,9 @@ def _eval_test_set(sess, model, test_buckets):
             print("  Test: empty bucket %d" % (bucket_id))
             continue
         start = time.time()
-        encoder_inputs, decoder_inputs, decoder_masks = dataset.get_batch(test_buckets[bucket_id],
-                                                                          bucket_id,
-                                                                          batch_size=config.BATCH_SIZE)
+        encoder_inputs, decoder_inputs, decoder_masks = data.get_batch(test_buckets[bucket_id],
+                                                                       bucket_id,
+                                                                       batch_size=config.BATCH_SIZE)
         _, step_loss, _ = run_step(sess, model, encoder_inputs, decoder_inputs,
                                    decoder_masks, bucket_id, True)
         print('Test bucket {}: loss {}, time {}'.format(
@@ -147,9 +147,9 @@ def train():
         while True:
             skip_step = _get_skip_step(iteration)
             bucket_id = _get_random_bucket(train_buckets_scale)
-            encoder_inputs, decoder_inputs, decoder_masks = dataset.get_batch(data_buckets[bucket_id],
-                                                                              bucket_id,
-                                                                              batch_size=config.BATCH_SIZE)
+            encoder_inputs, decoder_inputs, decoder_masks = data.get_batch(data_buckets[bucket_id],
+                                                                           bucket_id,
+                                                                           batch_size=config.BATCH_SIZE)
             start = time.time()
             _, step_loss, _ = run_step(
                 sess, model, encoder_inputs, decoder_inputs, decoder_masks, bucket_id, False)
@@ -202,9 +202,9 @@ def _construct_response(output_logits, inv_dec_vocab):
 def chat():
     """ in test mode, we don't to create the backward path
     """
-    _, enc_vocab = dataset.load_vocab(
+    _, enc_vocab = data.load_vocab(
         os.path.join(config.PROCESSED_PATH, 'vocab.enc'))
-    inv_dec_vocab, _ = dataset.load_vocab(
+    inv_dec_vocab, _ = data.load_vocab(
         os.path.join(config.PROCESSED_PATH, 'vocab.dec'))
 
     model = tob(True, batch_size=1)
@@ -229,7 +229,7 @@ def chat():
                 break
             output_file.write('HUMAN ++++ ' + line + '\n')
             # Get token-ids for the input sentence.
-            token_ids = dataset.sentence2id(enc_vocab, str(line))
+            token_ids = data.sentence2id(enc_vocab, str(line))
             if (len(token_ids) > max_length):
                 print('Max length I can handle is:', max_length)
                 line = _get_user_input()
@@ -257,11 +257,11 @@ def main():
     args = parser.parse_args()
 
     if not os.path.isdir(config.PROCESSED_PATH):
-        dataset.prepare_raw_data()
-        dataset.process_data()
+        data.prepare_raw_data()
+        data.process_data()
     print('Data ready!')
     # create checkpoints folder if there isn't one already
-    dataset.make_dir(config.CPT_PATH)
+    data.make_dir(config.CPT_PATH)
 
     if args.mode == 'train':
         train()

@@ -1,5 +1,6 @@
 '''
-    Processing data from Cornell Movie Dialogs Corpus
+    Data Processing for seq2seq model implemented from Tensorflow
+    Data source: Cornell Movie Dialogs Corpus
 '''
 
 import os
@@ -13,9 +14,11 @@ import config
 
 def get_lines():
     id2line = {}
-    file_path = os.path.join(config.FILE_DIR, config.LINE_FILE)
+    file_path = os.path.join(config.DATA_PATH, config.LINE_FILE)
     print(config.LINE_FILE)
     with open(file_path, 'r', errors='ignore') as f:
+        # lines = f.readlines()
+        # for line in lines:
         i = 0
         try:
             for line in f:
@@ -32,7 +35,7 @@ def get_lines():
 
 def get_convos():
     """ Get conversations from the raw data """
-    file_path = os.path.join(config.FILE_DIR, config.CONVO_FILE)
+    file_path = os.path.join(config.DATA_PATH, config.CONV_FILE)
     convos = []
     with open(file_path, 'r') as f:
         for line in f.readlines():
@@ -91,7 +94,8 @@ def make_dir(path):
 
 
 def basic_tokenizer(line, normalize_digits=True):
-    """ A basic tokenizer to tokenize text into tokens."""
+    """ A basic tokenizer to tokenize text into tokens.
+    Feel free to change this to suit your need. """
     line = re.sub('<u>', '', line)
     line = re.sub('</u>', '', line)
     line = re.sub('\[', '', line)
@@ -169,6 +173,7 @@ def token2id(data, mode):
         else:
             ids = []
         ids.extend(sentence2id(vocab, line))
+        # ids.extend([vocab.get(token, vocab['<unk>']) for token in basic_tokenizer(line)])
         if mode == 'dec':
             ids.append(vocab['<\s>'])
         out_file.write(' '.join(str(id_) for id_ in ids) + '\n')
@@ -199,7 +204,7 @@ def load_data(enc_filename, dec_filename, max_training_size=None):
     data_buckets = [[] for _ in config.BUCKETS]
     i = 0
     while encode and decode:
-        if (i + 1) % 10000 == 0:
+        if i % 10000 == 0:
             print("Bucketing conversation number", i)
         encode_ids = [int(id_) for id_ in encode.split()]
         decode_ids = [int(id_) for id_ in decode.split()]
@@ -245,7 +250,7 @@ def get_batch(data_bucket, bucket_id, batch_size=1):
     batch_decoder_inputs = _reshape_batch(
         decoder_inputs, decoder_size, batch_size)
 
-    # create decoder_masks to be 0 for decoders that are padding. (Create decode weights)
+    # create decoder_masks to be 0 for decoders that are padding.
     batch_masks = []
     for length_id in range(decoder_size):
         batch_mask = np.ones(batch_size, dtype=np.float32)
