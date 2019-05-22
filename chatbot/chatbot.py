@@ -89,8 +89,7 @@ class Chatbot:
         globalArgs.add_argument('--verbose', action='store_true',
                                 help='When testing, will plot the outputs at the same time they are computed')
         globalArgs.add_argument('--debug', action='store_true',
-                                help='run DeepQA with Tensorflow debug mode. Read TF documentation for more details on this.')
-        # TODO: Add an option to delimit the max size
+                                help='run tob with Tensorflow debug mode. Read TF documentation for more details on this.')
         globalArgs.add_argument('--keepAll', action='store_true',
                                 help='If this option is set, all saved model will be kept (Warning: make sure you have enough free disk space or increase saveEvery)')
         globalArgs.add_argument('--modelTag', type=str, default=None,
@@ -542,7 +541,7 @@ class Chatbot:
         # NOTE: Simulate the old model existance to avoid rewriting the file parser
         with open(model_name, 'w') as f:
             f.write(
-                'This file is used internally by DeepQA to check the model existance. Please do not remove.\n')
+                'This file is used internally by tob to check the model existance. Please do not remove.\n')
         self.saver.save(sess, model_name)
         tqdm.write('Model saved.')
 
