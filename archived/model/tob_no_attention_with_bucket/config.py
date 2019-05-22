@@ -1,5 +1,5 @@
 # parameters for processing the dataset
-DATA_PATH = 'database\\cornell_movie_dialogs_corpus'
+DATA_PATH = 'data\\cornell'
 CONV_FILE = 'movie_conversations.txt'
 LINE_FILE = 'movie_lines.txt'
 OUTPUT_FILE = 'output.txt'
