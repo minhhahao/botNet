@@ -13,9 +13,9 @@ import random
 import string
 import collections
 
+from chatbot.corpus.cornelldata import CornellData
 
-from chatbot.corpus.cornell import CornellData
-
+nltk.download('punkt')
 
 class Batch:
     '''
@@ -108,9 +108,9 @@ class TextData:
         '''
         Only keep a small fraction of the dataset, given by the ratio
         '''
-        if not math.isclose(ratioDataset, 1.0):
-            self.shuffle()  # Really ?
-            print('WARNING: Ratio feature not implemented !!!')
+        #if not math.isclose(ratioDataset, 1.0):
+        #    self.shuffle()  # Really ?
+        #    print('WARNING: Ratio feature not implemented !!!')
         pass
 
     def shuffle(self):

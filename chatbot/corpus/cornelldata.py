@@ -31,7 +31,7 @@ class CornellData:
         '''
         lines = {}
 
-        with open(file, 'r', encoding='iso-8859-1', errors='ignore') as f:
+        with open(file, 'r', encoding='iso-8859-1') as f:
             for line in f:
                 values = line.split(" +++$+++ ")
 
@@ -54,7 +54,7 @@ class CornellData:
         """
         conversations = []
 
-        with open(file, 'r', encoding='iso-8859-1', errors='ignore') as f:
+        with open(file, 'r', encoding='iso-8859-1') as f:
             for line in f:
                 values = line.split(" +++$+++ ")
 

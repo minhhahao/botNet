@@ -12,10 +12,6 @@ def main():
     Launch the training with different parametters
     '''
 
-    # TODO: define:
-    # step+noize
-    # log scale instead of uniform
-
     # Define parametter: [min, max]
     dictParams = {
         "batchSize": [int, [1, 3]],
