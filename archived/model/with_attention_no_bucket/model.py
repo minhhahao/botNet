@@ -1,13 +1,8 @@
 '''
     Create model for the bot itself
 '''
-import time
 
 import tensorflow as tf
-import numpy as np
-
-import config
-import data
 
 
 def model_inputs():

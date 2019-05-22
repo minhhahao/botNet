@@ -3,7 +3,6 @@ Implements Tensorflow NMT model with seq2seq
 '''
 import time
 
-import numpy as np
 import tensorflow as tf
 
 import config
@@ -11,27 +10,27 @@ import config
 
 class tob:
     def __init__(self, forward_only, batch_size):
-        """forward_only: if set, we do not construct the backward pass in the model.
-        """
+        '''forward_only: if set, we do not construct the backward pass in the model.
+        '''
         print('Initialize new model')
         self.fw_only = forward_only
         self.batch_size = batch_size
 
     def _create_placeholders(self):
         # Feeds for inputs. It's a list of placeholders
-        print('Create placeholders')
+        print('Created placeholders.')
         self.encoder_inputs = [tf.placeholder(tf.int32, shape=[None], name='encoder{}'.format(i))
                                for i in range(config.BUCKETS[-1][0])]
         self.decoder_inputs = [tf.placeholder(tf.int32, shape=[None], name='decoder{}'.format(i))
-                               for i in range(config.BUCKETS[-1][1] + 1)]
+                               for i in range(config.BUCKETS[-1][1]+1)]
         self.decoder_masks = [tf.placeholder(tf.float32, shape=[None], name='mask{}'.format(i))
-                              for i in range(config.BUCKETS[-1][1] + 1)]
+                              for i in range(config.BUCKETS[-1][1]+1)]
 
         # Our targets are decoder inputs shifted by one (to ignore <GO> symbol)
         self.targets = self.decoder_inputs[1:]
 
     def _inference(self):
-        print('Create inference')
+        print('Created inference.')
         # If we use sampled softmax, we need an output projection.
         # Sampled softmax only makes sense if we sample less than vocabulary size.
         if config.NUM_SAMPLES > 0 and config.NUM_SAMPLES < config.DEC_VOCAB:
@@ -48,9 +47,10 @@ class tob:
                                               labels=labels,
                                               num_sampled=config.NUM_SAMPLES,
                                               num_classes=config.DEC_VOCAB)
+
         self.softmax_loss_function = sampled_loss
 
-        single_cell = tf.contrib.rnn.GRUCell(config.HIDDEN_SIZE)
+        single_cell = tf.contrib.rnn.LSTMCell(config.HIDDEN_SIZE)
         self.cell = tf.contrib.rnn.MultiRNNCell(
             [single_cell for _ in range(config.NUM_LAYERS)])
 
@@ -59,7 +59,7 @@ class tob:
         start = time.time()
 
         def _seq2seq_f(encoder_inputs, decoder_inputs, do_decode):
-            setattr(tf.contrib.rnn.GRUCell,
+            setattr(tf.contrib.rnn.LSTMCell,
                     '__deepcopy__', lambda self, _: self)
             setattr(tf.contrib.rnn.MultiRNNCell,
                     '__deepcopy__', lambda self, _: self)
@@ -83,9 +83,10 @@ class tob:
             # If we use output projection, we need to project outputs for decoding.
             if self.output_projection:
                 for bucket in range(len(config.BUCKETS)):
-                    self.outputs[bucket] = [tf.matmul(output,
-                                                      self.output_projection[0]) + self.output_projection[1]
-                                            for output in self.outputs[bucket]]
+                    self.outputs[bucket] = [tf.add(tf.matmul(
+                        output, self.output_projection[0]),
+                        self.output_projection[1])
+                        for output in self.outputs[bucket]]
         else:
             self.outputs, self.losses = tf.contrib.legacy_seq2seq.model_with_buckets(
                 self.encoder_inputs,
@@ -97,7 +98,7 @@ class tob:
                 softmax_loss_function=self.softmax_loss_function)
         print('Time:', time.time() - start)
 
-    def _creat_optimizer(self):
+    def _create_optimizer(self):
         print('Create optimizer... \nIt might take a couple of minutes depending on how many buckets you have.')
         with tf.variable_scope('training') as scope:
             self.global_step = tf.Variable(
@@ -110,13 +111,13 @@ class tob:
                 self.train_ops = []
                 start = time.time()
                 for bucket in range(len(config.BUCKETS)):
-
-                    clipped_grads, norm = tf.clip_by_global_norm(tf.gradients(self.losses[bucket],
-                                                                              trainables),
-                                                                 config.MAX_GRAD_NORM)
+                    clipped_grads, norm = tf.clip_by_global_norm(
+                        tf.gradients(self.losses[bucket], trainables),
+                        config.MAX_GRAD_NORM)
                     self.gradient_norms.append(norm)
-                    self.train_ops.append(self.optimizer.apply_gradients(zip(clipped_grads, trainables),
-                                                                         global_step=self.global_step))
+                    self.train_ops.append(self.optimizer.apply_gradients(
+                        zip(clipped_grads, trainables),
+                        global_step=self.global_step))
                     print('Creating opt for bucket {} took {} seconds'.format(
                         bucket, time.time() - start))
                     start = time.time()
@@ -128,5 +129,5 @@ class tob:
         self._create_placeholders()
         self._inference()
         self._create_loss()
-        self._creat_optimizer()
+        self._create_optimizer()
         self._create_summary()

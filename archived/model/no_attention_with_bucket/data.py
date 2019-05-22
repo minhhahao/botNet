@@ -15,7 +15,7 @@ import config
 def get_lines():
     id2line = {}
     file_path = os.path.join(config.DATA_PATH, config.LINE_FILE)
-    print(config.LINE_FILE)
+    # print(config.LINE_FILE)
     with open(file_path, 'r', errors='ignore') as f:
         # lines = f.readlines()
         # for line in lines:
@@ -34,7 +34,7 @@ def get_lines():
 
 
 def get_convos():
-    """ Get conversations from the raw data """
+    ''' Get conversations from the raw data '''
     file_path = os.path.join(config.DATA_PATH, config.CONV_FILE)
     convos = []
     with open(file_path, 'r') as f:
@@ -50,7 +50,7 @@ def get_convos():
 
 
 def question_answers(id2line, convos):
-    """ Divide the dataset into two sets: questions and answers. """
+    ''' Divide the dataset into two sets: questions and answers. '''
     questions, answers = [], []
     for convo in convos:
         for index, line in enumerate(convo[:-1]):
@@ -58,6 +58,14 @@ def question_answers(id2line, convos):
             answers.append(id2line[convo[index + 1]])
     assert len(questions) == len(answers)
     return questions, answers
+
+
+def make_dir(path):
+    ''' Create a directory if there isn't one already. '''
+    try:
+        os.mkdir(path)
+    except OSError:
+        pass
 
 
 def prepare_dataset(questions, answers):
@@ -85,24 +93,14 @@ def prepare_dataset(questions, answers):
         file.close()
 
 
-def make_dir(path):
-    """ Create a directory if there isn't one already. """
-    try:
-        os.mkdir(path)
-    except OSError:
-        pass
-
-
 def basic_tokenizer(line, normalize_digits=True):
-    """ A basic tokenizer to tokenize text into tokens.
-    Feel free to change this to suit your need. """
+    ''' A basic tokenizer to tokenize text into tokens.
+    Feel free to change this to suit your need. '''
     line = re.sub('<u>', '', line)
     line = re.sub('</u>', '', line)
-    line = re.sub('\[', '', line)
-    line = re.sub('\]', '', line)
     words = []
-    _WORD_SPLIT = re.compile("([.,!?\"'-<>:;)(])")
-    _DIGIT_RE = re.compile(r"\d")
+    _WORD_SPLIT = re.compile("([.,!?\''-< > : ; )(])")
+    _DIGIT_RE = re.compile(r'\d')
     for fragment in line.strip().lower().split():
         for token in re.split(_WORD_SPLIT, fragment):
             if not token:
@@ -131,7 +129,7 @@ def build_vocab(filename, normalize_digits=True):
         f.write('<pad>' + '\n')
         f.write('<unk>' + '\n')
         f.write('<s>' + '\n')
-        f.write('<\s>' + '\n')
+        f.write('</s>' + '\n')
         index = 4
         for word in sorted_vocab:
             if vocab[word] < config.THRESHOLD:
@@ -156,8 +154,8 @@ def sentence2id(vocab, line):
 
 
 def token2id(data, mode):
-    """ Convert all the tokens in the data into their corresponding
-    index in the vocabulary. """
+    ''' Convert all the tokens in the data into their corresponding
+    index in the vocabulary. '''
     vocab_path = 'vocab.' + mode
     in_path = data + '.' + mode
     out_path = data + '_ids.' + mode
@@ -175,7 +173,7 @@ def token2id(data, mode):
         ids.extend(sentence2id(vocab, line))
         # ids.extend([vocab.get(token, vocab['<unk>']) for token in basic_tokenizer(line)])
         if mode == 'dec':
-            ids.append(vocab['<\s>'])
+            ids.append(vocab['</s>'])
         out_file.write(' '.join(str(id_) for id_ in ids) + '\n')
 
 
@@ -204,8 +202,8 @@ def load_data(enc_filename, dec_filename, max_training_size=None):
     data_buckets = [[] for _ in config.BUCKETS]
     i = 0
     while encode and decode:
-        if i % 10000 == 0:
-            print("Bucketing conversation number", i)
+        if (i+1) % 10000 == 0:
+            print('Bucketing conversation number ', i)
         encode_ids = [int(id_) for id_ in encode.split()]
         decode_ids = [int(id_) for id_ in decode.split()]
         for bucket_id, (encode_max_size, decode_max_size) in enumerate(config.BUCKETS):
@@ -222,8 +220,8 @@ def _pad_input(input_, size):
 
 
 def _reshape_batch(inputs, size, batch_size):
-    """ Create batch-major inputs. Batch inputs are just re-indexed inputs
-    """
+    ''' Create batch-major inputs. Batch inputs are just re-indexed inputs
+    '''
     batch_inputs = []
     for length_id in range(size):
         batch_inputs.append(np.array([inputs[batch_id][length_id]
@@ -232,7 +230,7 @@ def _reshape_batch(inputs, size, batch_size):
 
 
 def get_batch(data_bucket, bucket_id, batch_size=1):
-    """ Return one batch to feed into the model """
+    ''' Return one batch to feed into the model '''
     # only pad to the max length of the bucket
     encoder_size, decoder_size = config.BUCKETS[bucket_id]
     encoder_inputs, decoder_inputs = [], []
