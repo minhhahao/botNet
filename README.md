@@ -1,13 +1,16 @@
 # tob
+
 _Some related links:_
-- [Logs](READLOGS.md)
+- [Logs](LOGS.md)
 - [Docs](docs)
 
-## Plans
-
-- Using Reddit comments from [pushshift.io](https://files.pushshift.io/reddit/comments/) as dataset
-  - Currently using data from _2010-10_
-- Implements [Tensorflow NMT](https://github.com/tensorflow/nmt) (Neural Machine Translation) for training the chatbot (_currently working_)
+## About
+An NMT based on seq2seq for translating language
+- Dataset:  
+  * [anki](http://www.manythings.org/anki/) to provide translation from any language to English
+    - Currently using [Spanish-English](www.manythings.org/anki/spa-eng.zip)
+- Algorithm:
+  - Tensorflow's implementation of [seq2seq](https://github.com/tensorflow/nmt)
 
 ## Woking in progress
 
@@ -15,3 +18,4 @@ _Some related links:_
 -   [x] Finish the database
 -   [x] Setting up training dataset
 -   [x] Creating training model from scratch with [tensorflow/nmt](https://github.com/tensorflow/nmt)
+-   [ ] Create a website to interact with the translation model
