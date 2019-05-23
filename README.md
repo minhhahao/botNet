@@ -7,7 +7,7 @@ _Some related links:_
 ## About
 An NMT based on seq2seq for translating language
 - Dataset:  
-  * [anki](http://www.manythings.org/anki/) to provide translation from any language to English
+  * [anki](http://www.manythings.org/anki/): translation from any language to English
     - Currently using [Spanish-English](www.manythings.org/anki/spa-eng.zip)
 - Algorithm:
   - Tensorflow's implementation of [seq2seq](https://github.com/tensorflow/nmt)
