@@ -47,25 +47,21 @@ def preprocess_sentence(w):
     '''
     w = unicode_to_ascii(w.lower().strip())
     # creating a space between a word and the punctuation following it
-    # eg: "he is a boy." => "he is a boy ."
     w = re.sub(r"([?.!,¿])", r" \1 ", w)
     w = re.sub(r'[" "]+', " ", w)
-
     # replacing everything with space except (a-z, A-Z, ".", "?", "!", ",")
     w = re.sub(r"[^a-zA-Z?.!,¿]+", " ", w)
-
     w = w.rstrip().strip()
-
-    # adding a start and an end token to the sentence
-    # so that the model know when to start and stop predicting.
     w = '<start> ' + w + ' <end>'
     return w
 
 
-# 1. Remove the accents
-# 2. Clean the sentences
-# 3. Return word pairs in the format: [ENGLISH, SPANISH]
 def create_dataset(path, num_examples):
+    '''
+    1. Remove the accents
+    2. Clean the sentences
+    3. Return word pairs in the format: [ENGLISH, SPANISH]
+    '''
     lines = open(path, encoding='UTF-8').read().strip().split('\n')
 
     word_pairs = [[preprocess_sentence(w) for w in l.split(
@@ -74,9 +70,12 @@ def create_dataset(path, num_examples):
     return word_pairs
 
 
-# This class creates a word -> index mapping (e.g,. "dad" -> 5) and vice-versa
-# (e.g., 5 -> "dad") for each language,
 class LanguageIndex():
+    '''
+    Creates a word -> index mapping and vice-versa
+    e.g., 5 -> "dad"
+    '''
+
     def __init__(self, lang):
         self.lang = lang
         self.word2idx = {}

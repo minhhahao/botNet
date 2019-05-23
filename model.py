@@ -4,6 +4,7 @@ import tensorflow as tf
 import numpy as np
 
 
+# Define GRU cells
 def gru(units):
     if tf.test.is_gpu_available():
         return tf.keras.layers.CuDNNGRU(units,
@@ -58,14 +59,13 @@ class Decoder(tf.keras.Model):
 
     def call(self, x, hidden, enc_output):
         # enc_output shape == (batch_size, max_length, hidden_size)
-
         # hidden shape == (batch_size, hidden size)
         # hidden_with_time_axis shape == (batch_size, 1, hidden size)
-        # we are doing this to perform addition to calculate the score
+        # perform addition to calculate the score
         hidden_with_time_axis = tf.expand_dims(hidden, 1)
 
         # score shape == (batch_size, max_length, 1)
-        # we get 1 at the last axis because we are applying tanh(FC(EO) + FC(H)) to self.V
+        # get 1 at the last axis because of applying tanh(FC(EO) + FC(H)) to self.V
         score = self.V(tf.nn.tanh(self.W1(enc_output) +
                                   self.W2(hidden_with_time_axis)))
 
