@@ -3,12 +3,16 @@
 '''
 
 import numpy as np
-from tqdm import tqdm  # Progress bar
-
-import nltk  # For tokenize
-import pickle  # Saving the data cuz json sucks
-import math  # For float comparison
-import os  # Checking file existance
+# Progress bar
+from tqdm import tqdm
+# For tokenize
+import nltk
+# Saving the data cuz json sucks
+import pickle
+# For float comparison
+import math
+# Checking file existance
+import os
 import random
 import string
 import collections

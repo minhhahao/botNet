@@ -12,7 +12,7 @@ An NMT based on seq2seq for translating language
 - Algorithm:
   - Tensorflow's implementation of [seq2seq](https://github.com/tensorflow/nmt)
 
-## Woking in progress
+## Checklist
 
 -   [x] Processing RAW JSON file
 -   [x] Finish the database

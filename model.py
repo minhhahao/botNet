@@ -1,29 +1,11 @@
-from __future__ import absolute_import, division, print_function
-
+# renaming module
+from __future__ import absolute_import, division, print_function, unicode_literals
 import tensorflow as tf
 import numpy as np
 
-
-# Define GRU cells
-def gru(units):
-    if tf.test.is_gpu_available():
-        return tf.keras.layers.CuDNNGRU(units,
-                                        return_sequences=True,
-                                        return_state=True,
-                                        recurrent_initializer='glorot_uniform')
-    else:
-        return tf.keras.layers.GRU(units,
-                                   return_sequences=True,
-                                   return_state=True,
-                                   recurrent_activation='sigmoid',
-                                   recurrent_initializer='glorot_uniform')
-
-
-def loss_function(real, pred):
-    mask = 1 - np.equal(real, 0)
-    loss_ = tf.nn.sparse_softmax_cross_entropy_with_logits(
-        labels=real, logits=pred) * mask
-    return tf.reduce_mean(loss_)
+# import files
+import data
+import config
 
 
 class Encoder(tf.keras.Model):
@@ -32,7 +14,10 @@ class Encoder(tf.keras.Model):
         self.batch_sz = batch_sz
         self.enc_units = enc_units
         self.embedding = tf.keras.layers.Embedding(vocab_size, embedding_dim)
-        self.gru = gru(self.enc_units)
+        self.gru = tf.keras.layers.GRU(self.enc_units,
+                                       return_sequences=True,
+                                       return_state=True,
+                                       recurrent_initializer='glorot_uniform')
 
     def call(self, x, hidden):
         x = self.embedding(x)
@@ -43,38 +28,52 @@ class Encoder(tf.keras.Model):
         return tf.zeros((self.batch_sz, self.enc_units))
 
 
+class BahdanauAttention(tf.keras.Model):
+    def __init__(self, units):
+        super(BahdanauAttention, self).__init__()
+        self.W1 = tf.keras.layers.Dense(units)
+        self.W2 = tf.keras.layers.Dense(units)
+        self.V = tf.keras.layers.Dense(1)
+
+    def call(self, query, values):
+        # hidden shape == (batch_size, hidden size)
+        # hidden_with_time_axis shape == (batch_size, 1, hidden size)
+        # we are doing this to perform addition to calculate the score
+        hidden_with_time_axis = tf.expand_dims(query, 1)
+
+        # score shape == (batch_size, max_length, hidden_size)
+        score = self.V(tf.nn.tanh(
+            self.W1(values) + self.W2(hidden_with_time_axis)))
+
+        # attention_weights shape == (batch_size, max_length, 1)
+        # get 1 at the last axis because applying score to self.V
+        attention_weights = tf.nn.softmax(score, axis=1)
+
+        # context_vector shape after sum == (batch_size, hidden_size)
+        context_vector = attention_weights * values
+        context_vector = tf.reduce_sum(context_vector, axis=1)
+
+        return context_vector, attention_weights
+
+
 class Decoder(tf.keras.Model):
     def __init__(self, vocab_size, embedding_dim, dec_units, batch_sz):
         super(Decoder, self).__init__()
         self.batch_sz = batch_sz
         self.dec_units = dec_units
         self.embedding = tf.keras.layers.Embedding(vocab_size, embedding_dim)
-        self.gru = gru(self.dec_units)
+        self.gru = tf.keras.layers.GRU(self.dec_units,
+                                       return_sequences=True,
+                                       return_state=True,
+                                       recurrent_initializer='glorot_uniform')
         self.fc = tf.keras.layers.Dense(vocab_size)
 
         # used for attention
-        self.W1 = tf.keras.layers.Dense(self.dec_units)
-        self.W2 = tf.keras.layers.Dense(self.dec_units)
-        self.V = tf.keras.layers.Dense(1)
+        self.attention = BahdanauAttention(self.dec_units)
 
     def call(self, x, hidden, enc_output):
         # enc_output shape == (batch_size, max_length, hidden_size)
-        # hidden shape == (batch_size, hidden size)
-        # hidden_with_time_axis shape == (batch_size, 1, hidden size)
-        # perform addition to calculate the score
-        hidden_with_time_axis = tf.expand_dims(hidden, 1)
-
-        # score shape == (batch_size, max_length, 1)
-        # get 1 at the last axis because of applying tanh(FC(EO) + FC(H)) to self.V
-        score = self.V(tf.nn.tanh(self.W1(enc_output) +
-                                  self.W2(hidden_with_time_axis)))
-
-        # attention_weights shape == (batch_size, max_length, 1)
-        attention_weights = tf.nn.softmax(score, axis=1)
-
-        # context_vector shape after sum == (batch_size, hidden_size)
-        context_vector = attention_weights * enc_output
-        context_vector = tf.reduce_sum(context_vector, axis=1)
+        context_vector, attention_weights = self.attention(hidden, enc_output)
 
         # x shape after passing through embedding == (batch_size, 1, embedding_dim)
         x = self.embedding(x)
@@ -88,17 +87,48 @@ class Decoder(tf.keras.Model):
         # output shape == (batch_size * 1, hidden_size)
         output = tf.reshape(output, (-1, output.shape[2]))
 
-        # output shape == (batch_size * 1, vocab)
+        # output shape == (batch_size, vocab)
         x = self.fc(output)
 
         return x, state, attention_weights
 
-    def initialize_hidden_state(self):
-        return tf.zeros((self.batch_sz, self.dec_units))
 
+class NMT(Encoder, Decoder):
+    def __init__(self, DataHandler):
+        print('Model created. ')
+        self.data = DataHandler  # keep reference on dataHandler
+        self.vocab_in_size = len(data.input_language.word_index)+1
+        self.vocab_out_size = len(data.target_language.word_index)+1
+        self.embedding_dim = config.EMBEDDING_DIMENSION
+        self.units = config.UNITS
+        self.batch_size = config.BATCH_SIZE
+        # construct the model
+        self.buildNet()
 
-def create_model(vocab_inp_size, vocab_tar_size, embedding_dim, units, batch_size):
-    encoder = Encoder(vocab_inp_size, embedding_dim, units, batch_size)
-    decoder = Decoder(vocab_tar_size, embedding_dim, units, batch_size)
-    optimizer = tf.train.AdamOptimizer()
-    return encoder, decoder, optimizer
+    def buildNet(self):
+        encoder = Encoder(self.vocab_in_size,
+                          self.embedding_dim,
+                          self.units,
+                          self.batch_size)
+        decoder = Decoder(self.vocab_out_size,
+                          self.embedding_dim,
+                          self.units,
+                          self.batch_size)
+        optimizer = tf.keras.optimizers.Adam(lr=config.LEARNING_RATE,
+                                             beta_1=0.9,
+                                             beta_2=0.999,
+                                             epsilon=1e-8)
+        return encoder, decoder, optimizer
+
+    # Define loss_function
+
+    def loss_function(self, real, pred):
+        loss_object = tf.keras.losses.SparseCategoricalCrossentropy(
+            from_logits=True, reduction='none')
+        mask = tf.math.logical_not(tf.math.equal(real, 0))
+        loss_ = loss_object(real, pred)
+
+        mask = tf.cast(mask, dtype=loss_.dtype)
+        loss_ *= mask
+
+        return tf.reduce_mean(loss_)

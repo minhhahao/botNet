@@ -2,15 +2,15 @@
 Script for constructing the bot
 '''
 
-import argparse  # Command line parsing
-import configparser  # Saving the models parameters
-import datetime  # Chronometer
-import os  # Files management
+import argparse
+import configparser
+import datetime
+import os
 import tensorflow as tf
 import numpy as np
 import math
 
-from tqdm import tqdm  # Progress bar
+from tqdm import tqdm
 from tensorflow.python import debug as tf_debug
 
 from chatbot.textdata import TextData
