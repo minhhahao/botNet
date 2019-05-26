@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 # import module
 import os
 import tensorflow as tf
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 tf.random.set_seed(1234)
 # clean terminal view
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
@@ -133,6 +133,7 @@ class PositionalEncoding(tf.keras.layers.Layer):
     def call(self, inputs):
         return inputs + self.pos_encoding[:, :tf.shape(inputs)[1], :]
 
+
 '''
 sample_pos_encoding = PositionalEncoding(50, 512)
 
@@ -143,6 +144,7 @@ plt.ylabel('Position')
 plt.colorbar()
 plt.show()
 '''
+
 
 def encoder_layer(units, d_model, num_heads, dropout, name="encoder_layer"):
     inputs = tf.keras.Input(shape=(None, d_model), name="inputs")
@@ -168,6 +170,7 @@ def encoder_layer(units, d_model, num_heads, dropout, name="encoder_layer"):
     return tf.keras.Model(
         inputs=[inputs, padding_mask], outputs=outputs, name=name)
 
+
 '''
 # Sample encoder layer
 sample_encoder_layer = encoder_layer(
@@ -180,6 +183,7 @@ sample_encoder_layer = encoder_layer(
 tf.keras.utils.plot_model(
     sample_encoder_layer, to_file='images' + os.sep + 'encoder_layer.png', show_shapes=True)
 '''
+
 
 def encoder(vocab_size,
             num_layers,
@@ -209,6 +213,7 @@ def encoder(vocab_size,
     return tf.keras.Model(
         inputs=[inputs, padding_mask], outputs=outputs, name=name)
 
+
 '''
 # Sample encoder model using n-encoder layer
 sample_encoder = encoder(
@@ -223,6 +228,7 @@ sample_encoder = encoder(
 tf.keras.utils.plot_model(
     sample_encoder, to_file='images' + os.sep + 'encoder.png', show_shapes=True)
 '''
+
 
 def decoder_layer(units, d_model, num_heads, dropout, name="decoder_layer"):
     inputs = tf.keras.Input(shape=(None, d_model), name="inputs")
@@ -263,6 +269,7 @@ def decoder_layer(units, d_model, num_heads, dropout, name="decoder_layer"):
         outputs=outputs,
         name=name)
 
+
 '''
 # Sample decoder layer
 sample_decoder_layer = decoder_layer(
@@ -275,6 +282,7 @@ sample_decoder_layer = decoder_layer(
 tf.keras.utils.plot_model(
     sample_decoder_layer, to_file='images' + os.sep + 'decoder_layer.png', show_shapes=True)
 '''
+
 
 def decoder(vocab_size,
             num_layers,
@@ -309,6 +317,7 @@ def decoder(vocab_size,
         outputs=outputs,
         name=name)
 
+
 '''
 # Sample decoder model using n-decoder layer
 sample_decoder = decoder(
@@ -323,6 +332,7 @@ sample_decoder = decoder(
 tf.keras.utils.plot_model(
     sample_decoder, to_file='images' + os.sep + 'decoder.png', show_shapes=True)
 '''
+
 
 def transformer(vocab_size,
                 num_layers,
@@ -369,6 +379,7 @@ def transformer(vocab_size,
         units=vocab_size, name="outputs")(dec_outputs)
 
     return tf.keras.Model(inputs=[inputs, dec_inputs], outputs=outputs, name=name)
+
 
 '''
 # Sample seq2seq model with transformer

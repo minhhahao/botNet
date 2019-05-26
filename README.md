@@ -5,17 +5,16 @@ _Some related links:_
 - [Docs](docs)
 
 ## About
-An NMT based on seq2seq for translating language
+A chatbot based on [this paper](https://arxiv.org/pdf/1706.03762.pdf)
 - Dataset:  
-  * [anki](http://www.manythings.org/anki/): translation from any language to English
-    - Currently using [Spanish-English](www.manythings.org/anki/spa-eng.zip)
+  * [Cornell Movie Corpus](https://www.cs.cornell.edu/~cristian/Cornell_Movie-Dialogs_Corpus.html)
+    - the files can be found in [data](data/cornell)
 - Algorithm:
-  - Tensorflow's implementation of [seq2seq](https://github.com/tensorflow/nmt)
+  - seq2seq model using attention
 
 ## Checklist
 
--   [x] Processing RAW JSON file
--   [x] Finish the database
--   [x] Setting up training dataset
--   [x] Creating training model from scratch with [tensorflow/nmt](https://github.com/tensorflow/nmt)
--   [ ] Create a website to interact with the translation model
+-   [x] Finished processing database
+-   [x] Creating training model based on [tensorflow/nmt](https://github.com/tensorflow/nmt)
+-   [ ] Website to interact with the bot
+-   [ ] CNN for facial detection and automation ?
