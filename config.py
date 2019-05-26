@@ -1,16 +1,20 @@
-# Parameters for:
-# 1. file
-DATA_PATH = 'data'
-SAVE_PATH = 'save'
+import os
 
-# 2. Hyperparams
-NUM_EXAMPLES = 50000
+DATA_PATH = os.path.join('data', 'cornell')
+CKPT_PATH = os.path.join('data', 'save', 'model')
+LINES_FILE = 'movie_lines.txt'
+CONVERSATIONS_FILE = 'movie_conversations.txt'
+
+MAX_SAMPLES = 25000
+MAX_LENGTH = 40
+
 BATCH_SIZE = 64
-EMBEDDING_DIMENSION = 256
-UNITS = 1024
-EPOCHS = 50
-LEARNING_RATE = 0.005
+BUFFER_SIZE = 20000
 
-# 3. Params for model
-KEEP = True
-SAVE_EVERY = 2000
+# Hyper-parameters
+NUM_LAYERS = 3
+D_MODEL = 512
+NUM_HEADS = 8
+UNITS = 1024
+DROPOUT = 0.374
+EPOCHS = 20

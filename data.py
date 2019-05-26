@@ -1,190 +1,112 @@
+# import future
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+from __future__ import unicode_literals
 # import module
-from __future__ import absolute_import, division, print_function, unicode_literals
 import os
-import io
 import re
-import unicodedata
-import time
-
-# import file from the directory
-import config
-
-# renaming module
-import numpy as np
+import tensorflow_datasets as tfds
 import tensorflow as tf
-# Draw output attention graph
-import matplotlib.pyplot as plt
-from sklearn.model_selection import train_test_split
+# import file
+import config
+# clean terminal view
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 
-class DataHandler():
-    def __init__(self):
-        '''
-        Load all conversations
-        Args:
-            args: parameters of the model
-        '''
-        # Path
-        self.data_file = self._filePath(config.DATA_PATH, target='spa')
-        # Parameters
-        self.input_language = []
-        self.target_language = []
-        self.input_tensor = []
-        self.target_tensor = []
-        self.input_lang_tokenizer = []  # Index input language
-        self.target_lang_tokenizer = []  # Index output language
-        self.max_length_input = 0
-        self. max_length_target = 0
+def preprocess_sentence(sentence):
+    sentence = sentence.lower().strip()
+    # creating a space between a word and the punctuation following it
+    # eg: "he is a boy." => "he is a boy ."
+    sentence = re.sub(r"([?.!,])", r" \1 ", sentence)
+    sentence = re.sub(r'[" "]+', " ", sentence)
+    # replacing everything with space except (a-z, A-Z, ".", "?", "!", ",")
+    sentence = re.sub(r"[^a-zA-Z?.!,]+", " ", sentence)
+    sentence = sentence.strip()
+    # adding a start and an end token to the sentence
+    return sentence
 
-    # NOTE: Misc
-    def _filePath(self, dir, target=''):
-        '''
-        args:
-            dir: directory of dataset
-            target: target translate language
-        returns:
-            data directory
-        '''
-        data = [f for f in os.listdir(dir)]
-        for f in data:
-            if f[:-4] == target:
-                fileName = f
-                file = os.getcwd() + os.sep + config.DATA_PATH + os.sep + fileName
-            return file
 
-    def convert(self, lang, tensor):
-        '''
-        Help visualise index to word mapping
-        args:
-            lang: input/output language
-            tensor: given tensor
-        returns:
-            pretty print for lit terminal
-        '''
-        for t in tensor:
-            if t != 0:
-                print("%d ----> %s" % (t, lang.index_word[t]))
+def load_conversations():
+    # dictionary of line id to text
+    id2line = {}
+    with open(os.path.join(config.DATA_PATH, config.LINES_FILE), errors='ignore') as file:
+        lines = file.readlines()
+    for line in lines:
+        parts = line.replace('\n', '').split(' +++$+++ ')
+        id2line[parts[0]] = parts[4]
 
-    def len_target(self):
-        self.max_length_input = self.max_length(self.input_tensor)
-        self.max_length_target = self.max_length(self.target_tensor)
+    inputs, outputs = [], []
+    with open(os.path.join(config.DATA_PATH, config.CONVERSATIONS_FILE), 'r') as file:
+        lines = file.readlines()
+    for line in lines:
+        parts = line.replace('\n', '').split(' +++$+++ ')
+        # get conversation in a list of line ID
+        conversation = [line[1:-1] for line in parts[3][1:-1].split(', ')]
+        for i in range(len(conversation) - 1):
+            inputs.append(preprocess_sentence(id2line[conversation[i]]))
+            outputs.append(preprocess_sentence(id2line[conversation[i + 1]]))
+            if len(inputs) >= config.MAX_SAMPLES:
+                return inputs, outputs
+    return inputs, outputs
 
-        def max_length(self, tensor):
-            '''
-            Calculate max_length of input and output tensor
-            args:
-                tensor: input/output tensor
-            return:
-                int(): length of the tensor
-            '''
-            return max(len(t) for t in tensor)
-        return self.max_length_input, self.max_length_target
 
-    def plot_attention(attention, sentence, predicted_sentence):
-        '''
-        plotting the attention weights
-        args:
-            attention: weight
-            sentence: input
-            predicted_sentence: output
-        returns:
-            a nice attention weight plot
-        '''
-        fig = plt.figure(figsize=(6, 6))
-        ax = fig.add_subplot(1, 1, 1)
-        ax.matshow(attention, cmap='viridis')
-        fontdict = {'fontsize': 12}
-        ax.set_xticklabels([''] + sentence, fontdict=fontdict, rotation=90)
-        ax.set_yticklabels([''] + predicted_sentence, fontdict=fontdict)
-        plt.show()
+# Load questions, answers pair
+questions, answers = load_conversations()
+# sample questions
+print('\nSample question: {}'.format(questions[20]))
+print('\nSample answer: {}'.format(answers[20]))
 
-    def split_set(self):
-        '''
-        split training, validation set of data
-        args:
-        returns:
-            input_tensor_train
-            input_tensor_validation
-            target_tensor_train
-            target_tensor_validation
-        '''
-        input_tensor_train, input_tensor_validation, target_tensor_train, target_tensor_validation = train_test_split(
-            self.input_tensor, self.target_tensor, test_size=0.2)
-        return input_tensor_train, input_tensor_validation, target_tensor_train, target_tensor_validation
+# Build tokenizer using tfds for both questions and answers
+tokenizer = tfds.features.text.SubwordTextEncoder.build_from_corpus(
+    questions + answers, target_vocab_size=2**13)
+# Define start and end token to indicate the start and end of a sentence
+START_TOKEN, END_TOKEN = [tokenizer.vocab_size], [tokenizer.vocab_size + 1]
+# Vocabulary size plus start and end token
+VOCAB_SIZE = tokenizer.vocab_size + 2
+# print('Tokenized sample question: {}'.format(tokenizer.encode(questions[20])))
 
-    # NOTE: Dataset creation
-    def create_data(self, path, num_examples):
-        '''
-        args:
-            path: data_file
-            num_examples: # of examples defined in config.NUM_EXAMPLES
-        returns:
-            word pairs in the format: [in_lang, targ_lang]
-        '''
-        # TODO: creates more diverse set of input and output languages
-        start = time.time()
-        lines = io.open(path, encoding='UTF-8').read().strip().split('\n')
-        words_pairs = [[self.preprocess_sentence(w) for w in l.split('\t')]  for l in lines[:num_examples]]
-        print('Dataset created after {} sec'.format(time.time() - start))
-        return zip(*words_pairs)
 
-    def unicode_to_ascii(self, s):
-        '''
-        Converts the unicode file to ascii for better space allocation
-        args:
-            s : string
-        returns:
-            str(): ascii formatted file
-        '''
-        return ''.join(c for c in unicodedata.normalize('NFD', s)
-                       if unicodedata.category(c) != 'Mn')
+# Tokenize, filter and pad sentences
+def tokenize_and_filter(inputs, outputs):
+    tokenized_inputs, tokenized_outputs = [], []
 
-    def preprocess_sentence(self, w):
-        '''
-        Processing given sentence
-        args:
-            w: string
-        returns:
-            str(): sentence with <start> <end> marks
-        '''
-        w = self.unicode_to_ascii(w.lower().strip())
-        # creating a space between a word and the punctuation following it
-        w = re.sub(r"([?.!,¿])", r" \1 ", w)
-        w = re.sub(r'[" "]+', " ", w)
-        # replacing everything with space except (a-z, A-Z, ".", "?", "!", ",")
-        w = re.sub(r"[^a-zA-Z?.!,¿]+", " ", w)
-        w = w.rstrip().strip()
-        w = '<start> ' + w + ' <end>'
-        return w
+    for (sentence1, sentence2) in zip(inputs, outputs):
+        # tokenize sentence
+        sentence1 = START_TOKEN + tokenizer.encode(sentence1) + END_TOKEN
+        sentence2 = START_TOKEN + tokenizer.encode(sentence2) + END_TOKEN
+        # check tokenized sentence max length
+        if len(sentence1) <= config.MAX_LENGTH and len(sentence2) <= config.MAX_LENGTH:
+            tokenized_inputs.append(sentence1)
+            tokenized_outputs.append(sentence2)
 
-    # NOTE: Load dataset and create variables for the model
-    def load_data(self, path, num_examples=None):
-        '''
-        args:
-            str(path): data_file
-            int(num_examples): # of examples defined in config.NUM_EXAMPLES
-        returns:
-            list(input_tensor): input tensor with pad_sequences
-            list(target_tensor): output tensor with pad_sequences
-            str(input_language): index for input language using LanguageIndex
-            str(target_language): index for output language using LanguageIndex
-        '''
-        # creating cleaned input, output pairs
-        self.target_language, self.input_language = self.create_data(path, num_examples)
+    # pad tokenized sentences
+    tokenized_inputs = tf.keras.preprocessing.sequence.pad_sequences(
+        tokenized_inputs, maxlen=config.MAX_LENGTH, padding='post')
+    tokenized_outputs = tf.keras.preprocessing.sequence.pad_sequences(
+        tokenized_outputs, maxlen=config.MAX_LENGTH, padding='post')
 
-        self.input_tensor, self.input_lang_tokenizer = self.tokenize(self.input_language)
-        self.target_tensor, self.target_lang_tokenizer = self.tokenize(
-            self.target_language)
+    return tokenized_inputs, tokenized_outputs
 
-        return self.input_tensor, self.target_tensor, self.input_lang_tokenizer, self.target_lang_tokenizer
 
-    def tokenize(self, lang):
-        lang_tokenizer = tf.keras.preprocessing.text.Tokenizer(filters='')
-        lang_tokenizer.fit_on_texts(lang)
+questions, answers = tokenize_and_filter(questions, answers)
+print('\nVocab size: {}'.format(VOCAB_SIZE))
+print('\nNumber of samples: {}'.format(len(questions)))
 
-        tensor = lang_tokenizer.texts_to_sequences(lang)
-
-        tensor = tf.keras.preprocessing.sequence.pad_sequences(tensor,
-                                                               padding='post')
-
-        return tensor, lang_tokenizer
+# Building Dataset using tf.data.Dataset
+# decoder inputs use the previous target as input
+# remove START_TOKEN from targets
+dataset = tf.data.Dataset.from_tensor_slices((
+    {
+        'inputs': questions,
+        'dec_inputs': answers[:, :-1]
+    },
+    {
+        'outputs': answers[:, 1:]
+    },
+)).cache().shuffle(
+    config.BUFFER_SIZE).batch(
+    config.BATCH_SIZE).prefetch(
+    tf.data.experimental.AUTOTUNE)
+# return dataset objects
+# print(dataset)
