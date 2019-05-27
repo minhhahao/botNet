@@ -14,99 +14,108 @@ import config
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 
-def preprocess_sentence(sentence):
-    sentence = sentence.lower().strip()
-    # creating a space between a word and the punctuation following it
-    # eg: "he is a boy." => "he is a boy ."
-    sentence = re.sub(r"([?.!,])", r" \1 ", sentence)
-    sentence = re.sub(r'[" "]+', " ", sentence)
-    # replacing everything with space except (a-z, A-Z, ".", "?", "!", ",")
-    sentence = re.sub(r"[^a-zA-Z?.!,]+", " ", sentence)
-    sentence = sentence.strip()
-    # adding a start and an end token to the sentence
-    return sentence
+class dataHandler:
+    def __init__(self):
+        self.movie_lines = os.path.join(config.DATA_PATH, config.LINES_FILE)
+        self.movie_conversations = os.path.join(
+            config.DATA_PATH, config.CONVERSATIONS_FILE)
+        self.vocab_file = os.path.join(config.DATA_PATH, config.VOCAB_FILE)
+        self.questions, self.answers = self.load_conversations()
+        self.tokenizer, self.START_TOKEN, self.END_TOKEN, self.VOCAB_SIZE = self.tokenizer()
 
+    def preprocess_sentence(self, sentence):
+        sentence = sentence.lower().strip()
+        # creating a space between a word and the punctuation following it
+        # eg: "he is a boy." => "he is a boy ."
+        sentence = re.sub(r"([?.!,])", r" \1 ", sentence)
+        sentence = re.sub(r'[" "]+', " ", sentence)
+        # replacing everything with space except (a-z, A-Z, ".", "?", "!", ",")
+        sentence = re.sub(r"[^a-zA-Z?.!,]+", " ", sentence)
+        sentence = sentence.strip()
+        # adding a start and an end token to the sentence
+        return sentence
 
-def load_conversations():
-    # dictionary of line id to text
-    id2line = {}
-    with open(os.path.join(config.DATA_PATH, config.LINES_FILE), errors='ignore') as file:
-        lines = file.readlines()
-    for line in lines:
-        parts = line.replace('\n', '').split(' +++$+++ ')
-        id2line[parts[0]] = parts[4]
+    def load_conversations(self):
+        # dictionary of line id to text
+        id2line = {}
+        with open(self.movie_lines, errors='ignore') as file:
+            for line in file.readlines():
+                parts = line.replace('\n', '').split(' +++$+++ ')
+                id2line[parts[0]] = parts[4]
 
-    inputs, outputs = [], []
-    with open(os.path.join(config.DATA_PATH, config.CONVERSATIONS_FILE), 'r') as file:
-        lines = file.readlines()
-    for line in lines:
-        parts = line.replace('\n', '').split(' +++$+++ ')
-        # get conversation in a list of line ID
-        conversation = [line[1:-1] for line in parts[3][1:-1].split(', ')]
-        for i in range(len(conversation) - 1):
-            inputs.append(preprocess_sentence(id2line[conversation[i]]))
-            outputs.append(preprocess_sentence(id2line[conversation[i + 1]]))
-            if len(inputs) >= config.MAX_SAMPLES:
-                return inputs, outputs
-    return inputs, outputs
+        inputs, outputs = [], []
+        with open(self.movie_conversations, 'r') as file:
+            for line in file.readlines():
+                parts = line.replace('\n', '').split(' +++$+++ ')
+                # get conversation in a list of line ID
+                conversation = [line[1:-1]
+                                for line in parts[3][1:-1].split(', ')]
+                for i in range(len(conversation) - 1):
+                    inputs.append(self.preprocess_sentence(
+                        id2line[conversation[i]]))
+                    outputs.append(self.preprocess_sentence(
+                        id2line[conversation[i + 1]]))
+                    if len(inputs) >= config.MAX_SAMPLES:
+                        return inputs, outputs
+        return inputs, outputs
 
+    def tokenizer(self):
+        # Build tokenizer using tfds for both questions and answers
+        tokenizer = tfds.features.text.SubwordTextEncoder.build_from_corpus(
+            self.questions + self.answers, target_vocab_size=2**13)
+        if os.path.isfile(self.vocab_file):
+            print('Vocab file exists.')
+        else:
+            tokenizer.save_to_file(self.vocab_file)
+        # Define start and end token to indicate the start and end of a sentence
+        START_TOKEN, END_TOKEN = [tokenizer.vocab_size], [
+            tokenizer.vocab_size + 1]
+        # Vocabulary size plus start and end token
+        VOCAB_SIZE = tokenizer.vocab_size + 2
+        return tokenizer, START_TOKEN, END_TOKEN, VOCAB_SIZE
 
-# Load questions, answers pair
-questions, answers = load_conversations()
-# sample questions
-print('\nSample question: {}'.format(questions[20]))
-print('\nSample answer: {}'.format(answers[20]))
+    # Tokenize, filter and pad sentences
+    def tokenize_and_filter(self, inputs, outputs):
+        tokenized_inputs, tokenized_outputs = [], []
+        for (sentence1, sentence2) in zip(inputs, outputs):
+            # tokenize sentence
+            sentence1 = self.START_TOKEN + \
+                self.tokenizer.encode(sentence1) + self.END_TOKEN
+            sentence2 = self.START_TOKEN + \
+                self.tokenizer.encode(sentence2) + self.END_TOKEN
+            # check tokenized sentence max length
+            if len(sentence1) <= config.MAX_LENGTH and len(sentence2) <= config.MAX_LENGTH:
+                tokenized_inputs.append(sentence1)
+                tokenized_outputs.append(sentence2)
 
-# Build tokenizer using tfds for both questions and answers
-tokenizer = tfds.features.text.SubwordTextEncoder.build_from_corpus(
-    questions + answers, target_vocab_size=2**13)
-# Define start and end token to indicate the start and end of a sentence
-START_TOKEN, END_TOKEN = [tokenizer.vocab_size], [tokenizer.vocab_size + 1]
-# Vocabulary size plus start and end token
-VOCAB_SIZE = tokenizer.vocab_size + 2
-# print('Tokenized sample question: {}'.format(tokenizer.encode(questions[20])))
+        # pad tokenized sentences
+        tokenized_inputs = tf.keras.preprocessing.sequence.pad_sequences(
+            tokenized_inputs, maxlen=config.MAX_LENGTH, padding='post')
+        tokenized_outputs = tf.keras.preprocessing.sequence.pad_sequences(
+            tokenized_outputs, maxlen=config.MAX_LENGTH, padding='post')
 
+        return tokenized_inputs, tokenized_outputs
 
-# Tokenize, filter and pad sentences
-def tokenize_and_filter(inputs, outputs):
-    tokenized_inputs, tokenized_outputs = [], []
-
-    for (sentence1, sentence2) in zip(inputs, outputs):
-        # tokenize sentence
-        sentence1 = START_TOKEN + tokenizer.encode(sentence1) + END_TOKEN
-        sentence2 = START_TOKEN + tokenizer.encode(sentence2) + END_TOKEN
-        # check tokenized sentence max length
-        if len(sentence1) <= config.MAX_LENGTH and len(sentence2) <= config.MAX_LENGTH:
-            tokenized_inputs.append(sentence1)
-            tokenized_outputs.append(sentence2)
-
-    # pad tokenized sentences
-    tokenized_inputs = tf.keras.preprocessing.sequence.pad_sequences(
-        tokenized_inputs, maxlen=config.MAX_LENGTH, padding='post')
-    tokenized_outputs = tf.keras.preprocessing.sequence.pad_sequences(
-        tokenized_outputs, maxlen=config.MAX_LENGTH, padding='post')
-
-    return tokenized_inputs, tokenized_outputs
-
-
-questions, answers = tokenize_and_filter(questions, answers)
-print('\nVocab size: {}'.format(VOCAB_SIZE))
-print('\nNumber of samples: {}'.format(len(questions)))
-
-# Building Dataset using tf.data.Dataset
-# decoder inputs use the previous target as input
-# remove START_TOKEN from targets
-dataset = tf.data.Dataset.from_tensor_slices((
-    {
-        'inputs': questions,
-        'dec_inputs': answers[:, :-1]
-    },
-    {
-        'outputs': answers[:, 1:]
-    },
-)).cache().shuffle(
-    config.BUFFER_SIZE).batch(
-    config.BATCH_SIZE).prefetch(
-    tf.data.experimental.AUTOTUNE)
-# return dataset objects
-# print(dataset)
+    def create_dataset(self):
+        # sample questions
+        print('\nSample question: {}'.format(self.questions[10]))
+        print('\nSample answer: {}'.format(self.answers[10]))
+        print('\nTokenized sample question: {}'.format(
+            self.tokenizer.encode(self.questions[10])))
+        t_questions, t_answers = self.tokenize_and_filter(
+            self.questions, self.answers)
+        print('\nVocab size: {}'.format(self.VOCAB_SIZE))
+        print('\nNumber of samples: {}'.format(len(t_questions)))
+        # Building Dataset using tf.data.Dataset
+        # decoder inputs use the previous target as input
+        # remove START_TOKEN from targets
+        dataset = tf.data.Dataset.from_tensor_slices((
+            {
+                'inputs': t_questions,
+                'dec_inputs': t_answers[:, :-1]
+            },
+            {
+                'outputs': t_answers[:, 1:]
+            },
+        )).cache().shuffle(config.BUFFER_SIZE).batch(config.BATCH_SIZE).prefetch(tf.data.experimental.AUTOTUNE)
+        return dataset
