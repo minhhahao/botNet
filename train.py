@@ -19,9 +19,11 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 # Clear previous session
 # tf.keras.backend.clear_session()
+# print("TensorFlow version:{}".format(tf.__version__))
+# assert version.parse(tf.__version__).release[0] >= 2, "Requires TensorFlow 2.0 or above."
 
 
-def evaluate(sentence):
+def evaluate(model, sentence):
     sentence = data.preprocess_sentence(sentence)
 
     sentence = tf.expand_dims(
@@ -47,8 +49,8 @@ def evaluate(sentence):
     return tf.squeeze(output, axis=0)
 
 
-def predict(sentence):
-    prediction = evaluate(sentence)
+def predict(model, sentence):
+    prediction = evaluate(model, sentence)
 
     predicted_sentence = data.tokenizer.decode(
         [i for i in prediction if i < data.tokenizer.vocab_size])
@@ -127,20 +129,19 @@ optimizer = tf.keras.optimizers.Adam(
     learning_rate, beta_1=0.9, beta_2=0.98, epsilon=1e-9)
 log_dir = 'logs' + os.sep + 'fit' + os.sep + \
     datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
-tensorboard = tf.keras.callbacks.TensorBoard(log_dir=log_dir,
-                                             histogram_freq=1)
+tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir)
 # Create checkpoint
 ckpt_callback = tf.keras.callbacks.ModelCheckpoint(config.CKPT_PATH,
                                                    save_weights_only=True,
-                                                   verbose=1,
-                                                   period=5)
+                                                   verbose=0,
+                                                   period=10)
 
 # Train the model and save checkpoint
-'''
+
 model_1 = create_model()
-model_1.save_weights(config.CKPT_PATH.format(epoch=0))
+model_1.save_weights(config.CKPT_PATH.format(epoch=0,maxlen=config.MAX_LENGTH,layers=config.NUM_LAYERS,dropout=config.DROPOUT))
 model_1.fit(data.dataset, epochs=config.EPOCHS,
-             callbacks=[tensorboard, ckpt_callback])
+             callbacks=[tensorboard_callback, ckpt_callback])
 
 # After training for the first time, uncomment to continue training, comment
 # the first segment to avoid retrain the model
@@ -150,5 +151,5 @@ latest = tf.train.latest_checkpoint(config.CKPT_DIR)
 model_1 = create_model()
 model_1.load_weights(latest)
 model_1.fit(data.dataset, epochs=config.EPOCHS,
-            callbacks=[tensorboard, ckpt_callback])
-
+            callbacks=[tensorboard_callback, ckpt_callback])
+'''
