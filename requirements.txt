@@ -1,2 +1,2 @@
-tensorflow-gpu=2.0.0-dev20190525
+tensorflow-gpu==2.0.0-dev20190525
 tensorflow_datasets

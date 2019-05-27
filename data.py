@@ -22,6 +22,8 @@ class dataHandler:
         self.vocab_file = os.path.join(config.DATA_PATH, config.VOCAB_FILE)
         self.questions, self.answers = self.load_conversations()
         self.tokenizer, self.START_TOKEN, self.END_TOKEN, self.VOCAB_SIZE = self.tokenizer()
+        self.t_questions, self.t_answers = self.tokenize_and_filter(self.questions, self.answers)
+        self.dataset = self.create_dataset()
 
     def preprocess_sentence(self, sentence):
         sentence = sentence.lower().strip()
@@ -102,20 +104,18 @@ class dataHandler:
         print('\nSample answer: {}'.format(self.answers[10]))
         print('\nTokenized sample question: {}'.format(
             self.tokenizer.encode(self.questions[10])))
-        t_questions, t_answers = self.tokenize_and_filter(
-            self.questions, self.answers)
         print('\nVocab size: {}'.format(self.VOCAB_SIZE))
-        print('\nNumber of samples: {}'.format(len(t_questions)))
+        print('\nNumber of samples: {}'.format(len(self.t_questions)))
         # Building Dataset using tf.data.Dataset
         # decoder inputs use the previous target as input
         # remove START_TOKEN from targets
         dataset = tf.data.Dataset.from_tensor_slices((
             {
-                'inputs': t_questions,
-                'dec_inputs': t_answers[:, :-1]
+                'inputs': self.t_questions,
+                'dec_inputs': self.t_answers[:, :-1]
             },
             {
-                'outputs': t_answers[:, 1:]
+                'outputs': self.t_answers[:, 1:]
             },
         )).cache().shuffle(config.BUFFER_SIZE).batch(config.BATCH_SIZE).prefetch(tf.data.experimental.AUTOTUNE)
         return dataset
