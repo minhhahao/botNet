@@ -1,8 +1,8 @@
-import config
-from train import predict, create_model
+from train import predict, model_name
 import tensorflow as tf
+import os
 
-model_test = create_model()
-model_test.load_weights(tf.train.latest_checkpoint(config.CKPT_DIR))
+model_path = os.path.join(os.getcwd(), 'data', 'save', model_name)
+model = tf.keras.models.load_model(model_name)
 sentence = 'I am not crazy, my mother had me tested.'
-sentence = predict(model_test, sentence)
+sentence = predict(model, sentence)

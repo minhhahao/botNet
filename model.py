@@ -7,15 +7,13 @@ from __future__ import unicode_literals
 import os
 import tensorflow as tf
 # import matplotlib.pyplot as plt
-tf.random.set_seed(1234)
-# clean terminal view
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
+
 # https://github.com/AppliedDataSciencePartners/DeepReinforcementLearning/issues/3#issuecomment-420989055
-os.environ["PATH"] += os.pathsep + 'C:/Program Files (x86)/Graphviz2.38/bin/'
+os.environ['PATH'] += os.pathsep + 'C:/Program Files (x86)/Graphviz2.38/bin/'
 
 
 def scaled_dot_product_attention(query, key, value, mask):
-    """Calculate the attention weights. """
+    '''Calculate the attention weights.'''
     matmul_qk = tf.matmul(query, key, transpose_b=True)
 
     # scale matmul_qk

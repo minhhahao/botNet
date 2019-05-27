@@ -5,29 +5,30 @@ from __future__ import print_function
 from __future__ import unicode_literals
 # import module
 import os
-import datetime
+# import datetime
 # import matplotlib.pyplot as plt
 import tensorflow as tf
 # import file
 import config
 import data
 import model
-
-tf.random.set_seed(1234)
-# clean terminal view
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
-
 # Clear previous session
 # tf.keras.backend.clear_session()
 
+# init data object
+process = data.dataHandler()
+dataset = process.create_dataset()
+model_name = 'model-numLayers{}-Dmodel{}-units{}-dropout{}.h5'.format(
+    config.NUM_LAYERS, config.D_MODEL, config.UNITS, config.DROPOUT)
+
 
 def evaluate(model, sentence):
-    sentence = data.preprocess_sentence(sentence)
+    sentence = process.preprocess_sentence(sentence)
 
     sentence = tf.expand_dims(
-        data.START_TOKEN + data.tokenizer.encode(sentence) + data.END_TOKEN, axis=0)
+        process.START_TOKEN + process.tokenizer.encode(sentence) + process.END_TOKEN, axis=0)
 
-    output = tf.expand_dims(data.START_TOKEN, 0)
+    output = tf.expand_dims(process.START_TOKEN, 0)
 
     for i in range(config.MAX_LENGTH):
         predictions = model(inputs=[sentence, output], training=False)
@@ -37,9 +38,8 @@ def evaluate(model, sentence):
         predicted_id = tf.cast(tf.argmax(predictions, axis=-1), tf.int32)
 
         # return the result if the predicted_id is equal to the end token
-        if tf.equal(predicted_id, data.END_TOKEN[0]):
+        if tf.equal(predicted_id, process.END_TOKEN[0]):
             break
-
         # concatenated the predicted_id to the output which is given to the decoder
         # as its input.
         output = tf.concat([output, predicted_id], axis=-1)
@@ -49,13 +49,10 @@ def evaluate(model, sentence):
 
 def predict(model, sentence):
     prediction = evaluate(model, sentence)
-
-    predicted_sentence = data.tokenizer.decode(
+    predicted_sentence = process.tokenizer.decode(
         [i for i in prediction if i < data.tokenizer.vocab_size])
-
     print('Input: {}'.format(sentence))
     print('Output: {}'.format(predicted_sentence))
-
     return predicted_sentence
 
 
@@ -98,55 +95,33 @@ class CustomSchedule(tf.keras.optimizers.schedules.LearningRateSchedule):
 '''
 # Visualise sample learning curve
 sample_learning_rate = CustomSchedule(d_model=128)
-plt.plot(sample_learning_rate(tf.range(200000, dtype=tf.float32)))
 plt.ylabel("Learning Rate")
 plt.xlabel("Train Step")
+plt.plot(sample_learning_rate(tf.range(200000, dtype=tf.float32)))
 '''
-
-# create Model
-
-
-def create_model():
-    model_trans = model.transformer(
-        vocab_size=data.VOCAB_SIZE,
-        num_layers=config.NUM_LAYERS,
-        units=config.UNITS,
-        d_model=config.D_MODEL,
-        num_heads=config.NUM_HEADS,
-        dropout=config.DROPOUT)
-    # model_trans.summary()
-    model_trans.compile(optimizer=optimizer,
-                        loss=loss_function, metrics=[accuracy])
-    return model_trans
-
 
 # Custom params following the paper
 learning_rate = CustomSchedule(config.D_MODEL)
-optimizer = tf.keras.optimizers.Adam(
-    learning_rate, beta_1=0.9, beta_2=0.98, epsilon=1e-9)
-log_dir = 'logs' + os.sep + 'fit' + os.sep + \
-    datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
-tensorboard = tf.keras.callbacks.TensorBoard(log_dir=log_dir,
-                                             histogram_freq=1)
-# Create checkpoint
-ckpt_callback = tf.keras.callbacks.ModelCheckpoint(config.CKPT_PATH,
-                                                   save_weights_only=True,
-                                                   verbose=1,
-                                                   period=5)
+optimizer = tf.keras.optimizers.Adam(learning_rate, beta_1=0.9, beta_2=0.98, epsilon=1e-9)
+# log_dir = 'logs' + os.sep + 'fit' + os.sep + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+# tensorboard = tf.keras.callbacks.TensorBoard(log_dir=log_dir, histogram_freq=1)
 
+
+# Create model
+print('\nCreating model...')
+model_trans = model.transformer(
+    vocab_size=process.VOCAB_SIZE,
+    num_layers=config.NUM_LAYERS,
+    units=config.UNITS,
+    d_model=config.D_MODEL,
+    num_heads=config.NUM_HEADS,
+    dropout=config.DROPOUT)
+# model_trans.summary()
+model_trans.compile(optimizer=optimizer,
+                    loss=loss_function, metrics=[accuracy])
 # Train the model and save checkpoint
-
-model_1 = create_model()
-model_1.save_weights(config.CKPT_PATH.format(epoch=0))
-model_1.fit(data.dataset, epochs=config.EPOCHS,
-            callbacks=[tensorboard, ckpt_callback])
-# After training for the first time, uncomment to continue training, comment
-# the first segment to avoid retrain the model
-# TODO: create a function to do this rather than pseudo-code
-'''
-latest = tf.train.latest_checkpoint(config.CKPT_DIR)
-model_1 = create_model()
-model_1.load_weights(latest)
-model_1.fit(data.dataset, epochs=config.EPOCHS,
-            callbacks=[tensorboard, ckpt_callback])
-'''
+print('\nStart training...')
+model_trans.fit(dataset, epochs=config.EPOCHS)
+model_trans.save(os.path.join('data', 'save', model_name))
+print('\nSaved models to save file and then delete the model')
+del model_trans
