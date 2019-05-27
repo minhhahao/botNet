@@ -136,7 +136,6 @@ class PositionalEncoding(tf.keras.layers.Layer):
 
 '''
 sample_pos_encoding = PositionalEncoding(50, 512)
-
 plt.pcolormesh(sample_pos_encoding.pos_encoding.numpy()[0], cmap='RdBu')
 plt.xlabel('Depth')
 plt.xlim((0, 512))
@@ -179,7 +178,6 @@ sample_encoder_layer = encoder_layer(
     num_heads=4,
     dropout=0.3,
     name="sample_encoder_layer")
-
 tf.keras.utils.plot_model(
     sample_encoder_layer, to_file='images' + os.sep + 'encoder_layer.png', show_shapes=True)
 '''
@@ -224,7 +222,6 @@ sample_encoder = encoder(
     num_heads=4,
     dropout=0.3,
     name="sample_encoder")
-
 tf.keras.utils.plot_model(
     sample_encoder, to_file='images' + os.sep + 'encoder.png', show_shapes=True)
 '''
@@ -278,7 +275,6 @@ sample_decoder_layer = decoder_layer(
     num_heads=4,
     dropout=0.3,
     name="sample_decoder_layer")
-
 tf.keras.utils.plot_model(
     sample_decoder_layer, to_file='images' + os.sep + 'decoder_layer.png', show_shapes=True)
 '''
@@ -328,7 +324,6 @@ sample_decoder = decoder(
     num_heads=4,
     dropout=0.3,
     name="sample_decoder")
-
 tf.keras.utils.plot_model(
     sample_decoder, to_file='images' + os.sep + 'decoder.png', show_shapes=True)
 '''
@@ -392,7 +387,6 @@ sample_transformer = transformer(
     num_heads=4,
     dropout=0.3,
     name="sample_transformer")
-
 tf.keras.utils.plot_model(
     sample_transformer, to_file='images' + os.sep + 'transformer.png', show_shapes=True)
 '''

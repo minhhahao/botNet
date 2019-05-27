@@ -19,8 +19,6 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 # Clear previous session
 # tf.keras.backend.clear_session()
-# print("TensorFlow version:{}".format(tf.__version__))
-# assert version.parse(tf.__version__).release[0] >= 2, "Requires TensorFlow 2.0 or above."
 
 
 def evaluate(model, sentence):
@@ -100,7 +98,6 @@ class CustomSchedule(tf.keras.optimizers.schedules.LearningRateSchedule):
 '''
 # Visualise sample learning curve
 sample_learning_rate = CustomSchedule(d_model=128)
-
 plt.plot(sample_learning_rate(tf.range(200000, dtype=tf.float32)))
 plt.ylabel("Learning Rate")
 plt.xlabel("Train Step")
@@ -129,20 +126,20 @@ optimizer = tf.keras.optimizers.Adam(
     learning_rate, beta_1=0.9, beta_2=0.98, epsilon=1e-9)
 log_dir = 'logs' + os.sep + 'fit' + os.sep + \
     datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
-tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir)
+tensorboard = tf.keras.callbacks.TensorBoard(log_dir=log_dir,
+                                             histogram_freq=1)
 # Create checkpoint
 ckpt_callback = tf.keras.callbacks.ModelCheckpoint(config.CKPT_PATH,
                                                    save_weights_only=True,
-                                                   verbose=0,
-                                                   period=10)
+                                                   verbose=1,
+                                                   period=5)
 
 # Train the model and save checkpoint
 
 model_1 = create_model()
-model_1.save_weights(config.CKPT_PATH.format(epoch=0,maxlen=config.MAX_LENGTH,layers=config.NUM_LAYERS,dropout=config.DROPOUT))
+model_1.save_weights(config.CKPT_PATH.format(epoch=0))
 model_1.fit(data.dataset, epochs=config.EPOCHS,
-             callbacks=[tensorboard_callback, ckpt_callback])
-
+            callbacks=[tensorboard, ckpt_callback])
 # After training for the first time, uncomment to continue training, comment
 # the first segment to avoid retrain the model
 # TODO: create a function to do this rather than pseudo-code
@@ -151,5 +148,5 @@ latest = tf.train.latest_checkpoint(config.CKPT_DIR)
 model_1 = create_model()
 model_1.load_weights(latest)
 model_1.fit(data.dataset, epochs=config.EPOCHS,
-            callbacks=[tensorboard_callback, ckpt_callback])
+            callbacks=[tensorboard, ckpt_callback])
 '''
