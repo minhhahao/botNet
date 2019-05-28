@@ -1,13 +1,13 @@
 import os
 
-VERSION=1.0
+VERSION = 1
 # Init path
 DATA_PATH = os.path.join('data', 'cornell')
 LINES_FILE = 'movie_lines.txt'
 CONVERSATIONS_FILE = 'movie_conversations.txt'
 VOCAB_FILE = 'vocab'
 # Data processing parameters
-MAX_SAMPLES = 50000
+MAX_SAMPLES = 25000
 MAX_LENGTH = 40
 BATCH_SIZE = 64
 BUFFER_SIZE = 20000
@@ -18,5 +18,5 @@ D_MODEL = 256
 NUM_HEADS = 8
 UNITS = 512
 DROPOUT = 0.1
-EPOCHS = 10
+EPOCHS = 50
 # 20 is optimum considering learning rate decay

@@ -19,7 +19,7 @@ class dataHandler:
         self.movie_lines = os.path.join(config.DATA_PATH, config.LINES_FILE)
         self.movie_conversations = os.path.join(
             config.DATA_PATH, config.CONVERSATIONS_FILE)
-        self.vocab_file = os.path.join(config.DATA_PATH, config.VOCAB_FILE)
+        self.vocab_file = os.path.join('data', config.VOCAB_FILE)
         self.questions, self.answers = self.load_conversations()
         self.tokenizer, self.START_TOKEN, self.END_TOKEN, self.VOCAB_SIZE = self.tokenizer()
         self.t_questions, self.t_answers = self.tokenize_and_filter(self.questions, self.answers)
@@ -100,12 +100,11 @@ class dataHandler:
 
     def create_dataset(self):
         # sample questions
-        print('\nSample question: {}'.format(self.questions[10]))
-        print('\nSample answer: {}'.format(self.answers[10]))
-        print('\nTokenized sample question: {}'.format(
-            self.tokenizer.encode(self.questions[10])))
-        print('\nVocab size: {}'.format(self.VOCAB_SIZE))
-        print('\nNumber of samples: {}'.format(len(self.t_questions)))
+        # print('\nSample question: {}'.format(self.questions[10]))
+        # print('\nSample answer: {}'.format(self.answers[10]))
+        # print('\nTokenized sample question: {}'.format(self.tokenizer.encode(self.questions[10])))
+        # print('\nVocab size: {}'.format(self.VOCAB_SIZE))
+        # print('\nNumber of samples: {}'.format(len(self.t_questions)))
         # Building Dataset using tf.data.Dataset
         # decoder inputs use the previous target as input
         # remove START_TOKEN from targets
