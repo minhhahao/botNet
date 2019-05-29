@@ -160,5 +160,6 @@ def run():
                 if line == '':
                     break
                 predict(model_test, line)
+            del model_test
     except KeyboardInterrupt:
         print('\nTerminated')
