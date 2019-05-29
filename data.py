@@ -100,11 +100,11 @@ class dataHandler:
 
     def create_dataset(self):
         # sample questions
-        # print('\nSample question: {}'.format(self.questions[10]))
-        # print('\nSample answer: {}'.format(self.answers[10]))
-        # print('\nTokenized sample question: {}'.format(self.tokenizer.encode(self.questions[10])))
-        # print('\nVocab size: {}'.format(self.VOCAB_SIZE))
-        # print('\nNumber of samples: {}'.format(len(self.t_questions)))
+        print('\nSample question: {}'.format(self.questions[10]))
+        print('\nSample answer: {}'.format(self.answers[10]))
+        print('\nTokenized sample question: {}'.format(self.tokenizer.encode(self.questions[10])))
+        print('\nVocab size: {}'.format(self.VOCAB_SIZE))
+        print('\nNumber of samples: {}'.format(len(self.t_questions)))
         # Building Dataset using tf.data.Dataset
         # decoder inputs use the previous target as input
         # remove START_TOKEN from targets

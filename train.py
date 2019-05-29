@@ -7,7 +7,7 @@ from __future__ import unicode_literals
 import os
 import sys
 import datetime
-# import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
 import tensorflow as tf
 # import file
 import config
@@ -17,7 +17,7 @@ import model
 # data object
 process = data.dataHandler()
 
-log_dir = 'logs' + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+log_dir = 'logs' + os.sep + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
 file_writer = tf.summary.create_file_writer(log_dir + os.sep + 'scalar' + os.sep + 'metrics')
 file_writer.set_as_default()
 
@@ -39,13 +39,13 @@ class CustomSchedule(tf.keras.optimizers.schedules.LearningRateSchedule):
 
         return tf.math.rsqrt(self.d_model) * tf.math.minimum(arg1, arg2)
 
-'''
-# Visualise sample learning curve
-sample_learning_rate = CustomSchedule(d_model=128)
-plt.ylabel("Learning Rate")
-plt.xlabel("Train Step")
-plt.plot(sample_learning_rate(tf.range(200000, dtype=tf.float32)))
-'''
+
+def draw_learning_rate():
+    # Visualise sample learning curve
+    sample_learning_rate = CustomSchedule(d_model=128)
+    plt.ylabel("Learning Rate")
+    plt.xlabel("Train Step")
+    plt.plot(sample_learning_rate(tf.range(200000, dtype=tf.float32)))
 
 
 def loss_function(y_true, y_pred):
@@ -127,9 +127,9 @@ optimizer = tf.keras.optimizers.Adam(learning_rate, beta_1=0.9, beta_2=0.98, eps
 checkpoint_path = os.path.join('save', 'cp-{epoch:04d}.ckpt')
 checkpoint_dir = os.path.dirname(checkpoint_path)
 cp_callback = tf.keras.callbacks.ModelCheckpoint(checkpoint_path,
-                                                      verbose=1,
-                                                      save_weights_only=True,
-                                                      period=5)
+                                                 verbose=1,
+                                                 save_weights_only=True,
+                                                 period=5)
 tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir, write_graph=True, write_images=True)
 
 if __name__ == '__main__':
@@ -144,7 +144,7 @@ if __name__ == '__main__':
             model_trans.save_weights(checkpoint_path.format(epoch=0))
             print('\nStart training...\n')
             model_trans.fit(process.dataset, epochs=config.EPOCHS, callbacks=[cp_callback, tensorboard_callback])
-            print('Finished')
+            print('\nFinished')
             del model_trans
         elif inp == 'continue':
             model_new = create_model()
@@ -163,4 +163,4 @@ if __name__ == '__main__':
                     break
                 predict(model_test, line)
     except KeyboardInterrupt:
-        print('Terminated')
+        print('\nTerminated')
