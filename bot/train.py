@@ -127,7 +127,7 @@ def _get_user_input():
 
 
 def run():
-    inp = input('Type "train" to train, "continue" to continue training, "test" to test the model: ')
+    inp = input('Type "train" to start trainning new weight, "continue" to continue training, "test" to test the model: ')
     try:
         if inp == 'train':
             print('\n Creating models...')
@@ -141,7 +141,6 @@ def run():
                             epochs=config.EPOCHS,
                             callbacks=[cp_callback, tensorboard_callback])
             print('\nFinished')
-            del model_trans
         elif inp == 'continue':
             model_new = create_model()
             model_new.load_weights(tf.train.latest_checkpoint(checkpoint_dir))
@@ -149,7 +148,6 @@ def run():
             model_new.fit(process.dataset,
                           epochs=config.EPOCHS,
                           callbacks=[cp_callback, tensorboard_callback])
-            del model_new
         elif inp == 'test':
             model_test = create_model()
             model_test.load_weights(tf.train.latest_checkpoint(checkpoint_dir))
@@ -160,6 +158,5 @@ def run():
                 if line == '':
                     break
                 predict(model_test, line)
-            del model_test
     except KeyboardInterrupt:
         print('\nTerminated')
