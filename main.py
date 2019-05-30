@@ -1,3 +1,3 @@
-import bot.train as t
+from bot.train import run
 
-t.run()
+run()

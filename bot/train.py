@@ -24,14 +24,10 @@ process = data.dataHandler()
 # Log directory
 # TODO: Fixing tensorboard
 log_dir = 'logs' + os.sep + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
-file_writer = tf.summary.create_file_writer(log_dir + os.sep + 'scalar' + os.sep + 'metrics')
+file_writer = tf.summary.create_file_writer(
+    log_dir + os.sep + 'scalar' + os.sep + 'metrics')
 file_writer.set_as_default()
-# Custom params following the paper
-learning_rate = model.CustomSchedule(config.D_MODEL)
-optimizer = tf.keras.optimizers.Adam(learning_rate,
-                                     beta_1=0.9,
-                                     beta_2=0.98,
-                                     epsilon=1e-9)
+# Checkpoint for weight
 checkpoint_path = os.path.join('save', 'cp-{epoch:04d}.ckpt')
 checkpoint_dir = os.path.dirname(checkpoint_path)
 cp_callback = tf.keras.callbacks.ModelCheckpoint(checkpoint_path,
@@ -43,31 +39,30 @@ tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir,
                                                       write_images=True)
 
 
+# Custom learning rate schedules
+class CustomSchedule(tf.keras.optimizers.schedules.LearningRateSchedule):
+
+    def __init__(self, d_model, warmup_steps=4000):
+        super(CustomSchedule, self).__init__()
+
+        self.d_model = d_model
+        self.d_model = tf.cast(self.d_model, tf.float32)
+
+        self.warmup_steps = warmup_steps
+
+    def __call__(self, step):
+        arg1 = tf.math.rsqrt(step)
+        arg2 = step * (self.warmup_steps**-1.5)
+
+        return tf.math.rsqrt(self.d_model) * tf.math.minimum(arg1, arg2)
+
+
 def draw_learning_rate():
     # Visualise sample learning curve
-    sample_learning_rate = model.CustomSchedule(d_model=128)
+    sample_learning_rate = CustomSchedule(d_model=128)
     plt.ylabel("Learning Rate")
     plt.xlabel("Train Step")
     plt.plot(sample_learning_rate(tf.range(200000, dtype=tf.float32)))
-
-
-def loss_function(y_true, y_pred):
-    y_true = tf.reshape(y_true, shape=(-1, config.MAX_LENGTH - 1))
-
-    loss = tf.keras.losses.SparseCategoricalCrossentropy(
-        from_logits=True, reduction='none')(y_true, y_pred)
-
-    mask = tf.cast(tf.not_equal(y_true, 0), tf.float32)
-    loss = tf.multiply(loss, mask)
-
-    return tf.reduce_mean(loss)
-
-
-def accuracy(y_true, y_pred):
-    # ensure labels have shape (batch_size, MAX_LENGTH - 1)
-    y_true = tf.reshape(y_true, shape=(-1, config.MAX_LENGTH - 1))
-    accuracy = tf.metrics.SparseCategoricalAccuracy()(y_true, y_pred)
-    return accuracy
 
 
 def predict(model_t, sentence):
@@ -102,19 +97,39 @@ def predict(model_t, sentence):
 
 
 def create_model():
+    # Custom params following the paper
+    learning_rate = CustomSchedule(config.D_MODEL)
+    optimizer = tf.keras.optimizers.Adam(learning_rate,
+                                         beta_1=0.9,
+                                         beta_2=0.98,
+                                         epsilon=1e-9)
+
+    def loss_function(y_true, y_pred):
+        y_true = tf.reshape(y_true, shape=(-1, config.MAX_LENGTH - 1))
+        loss = tf.keras.losses.SparseCategoricalCrossentropy(
+            from_logits=True, reduction='none')(y_true, y_pred)
+        mask = tf.cast(tf.not_equal(y_true, 0), tf.float32)
+        loss = tf.multiply(loss, mask)
+        return tf.reduce_mean(loss)
+
+    def accuracy(y_true, y_pred):
+        # ensure labels have shape (batch_size, MAX_LENGTH - 1)
+        y_true = tf.reshape(y_true, shape=(-1, config.MAX_LENGTH - 1))
+        accuracy = tf.metrics.SparseCategoricalAccuracy()(y_true, y_pred)
+        return accuracy
+
     # Create model
-    # print('\nCreating model...')
-    model_trans = model.transformer(
+    created_model = model.transformer(
         vocab_size=process.VOCAB_SIZE,
         num_layers=config.NUM_LAYERS,
         units=config.UNITS,
         d_model=config.D_MODEL,
         num_heads=config.NUM_HEADS,
         dropout=config.DROPOUT)
-    model_trans.compile(optimizer=optimizer,
-                        loss=loss_function,
-                        metrics=[accuracy])
-    return model_trans
+    created_model.compile(optimizer=optimizer,
+                          loss=loss_function,
+                          metrics=[accuracy])
+    return created_model
 
 
 def _get_user_input():
@@ -126,37 +141,54 @@ def _get_user_input():
     return sys.stdin.readline()
 
 
-def run():
-    inp = input('Type "train" to start trainning new weight, "continue" to continue training, "test" to test the model: ')
+def train():
+    print('\n Creating models...')
+    model_train = create_model()
+    print('\nModel summary: ')
+    model_train.summary()
+    # Train the model and save checkpoint
+    model_train.save_weights(checkpoint_path.format(epoch=0))
+    print('\nStart training...\n')
+    model_train.fit(process.dataset,
+                    epochs=config.EPOCHS,
+                    callbacks=[cp_callback, tensorboard_callback])
+    print('\nFinished')
+    del model_train
+
+
+def continue_train():
+    model_cont = create_model()
+    model_cont.load_weights(tf.train.latest_checkpoint(checkpoint_dir))
+    print('\n Start retraining...\n')
+    model_cont.fit(process.dataset,
+                   epochs=config.EPOCHS,
+                   callbacks=[cp_callback, tensorboard_callback])
+    model_cont.save_weights(checkpoint_path.format(epoch=0))
+    del model_cont
+
+
+def test():
+    model_test = create_model()
+    model_test.load_weights(tf.train.latest_checkpoint(checkpoint_dir))
     try:
-        if inp == 'train':
-            print('\n Creating models...')
-            model_trans = create_model()
-            print('\nModel summary: ')
-            model_trans.summary()
-            # Train the model and save checkpoint
-            model_trans.save_weights(checkpoint_path.format(epoch=0))
-            print('\nStart training...\n')
-            model_trans.fit(process.dataset,
-                            epochs=config.EPOCHS,
-                            callbacks=[cp_callback, tensorboard_callback])
-            print('\nFinished')
-        elif inp == 'continue':
-            model_new = create_model()
-            model_new.load_weights(tf.train.latest_checkpoint(checkpoint_dir))
-            print('\n Start retraining...\n')
-            model_new.fit(process.dataset,
-                          epochs=config.EPOCHS,
-                          callbacks=[cp_callback, tensorboard_callback])
-        elif inp == 'test':
-            model_test = create_model()
-            model_test.load_weights(tf.train.latest_checkpoint(checkpoint_dir))
-            while True:
-                line = _get_user_input()
-                if len(line) > 0 and line[-1] == '\n':
-                    line = line[:-1]
-                if line == '':
-                    break
-                predict(model_test, line)
+        while True:
+            line = _get_user_input()
+            if len(line) > 0 and line[-1] == '\n':
+                line = line[:-1]
+            if line == '':
+                break
+            predict(model_test, line)
     except KeyboardInterrupt:
         print('\nTerminated')
+    del model_test
+
+
+def run():
+    inp = input(
+        'Type "train" to start trainning new weight, "continue" to continue training, "test" to test the model: ')
+    if inp == 'train':
+        train()
+    elif inp == 'continue':
+        continue_train()
+    elif inp == 'test':
+        test()
