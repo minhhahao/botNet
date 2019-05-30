@@ -123,6 +123,6 @@ _Problem 3_: creating _training_data_
 ## Week 5 - 6: Switching database to Cornell corpus, rewrite data processing, finished model, driver code and testing arguments
 ### Working with Cornell corpus
 * [Cornell Movie Dialogs](http://www.cs.cornell.edu/~cristian/Cornell_Movie-Dialogs_Corpus.html) corpus (default).
-- This section refers to [cornelldata](chatbot\corpus\cornelldata.py)
-  - Preprocessing the data is based on the given [README](data\cornell\README.txt) from the corpus
+- This section refers to [data.py](bot/data.py)
+  - Preprocessing the data is based on the given [README](data/cornell/README.txt) from the corpus
   - Usage:

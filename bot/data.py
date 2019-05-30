@@ -17,7 +17,7 @@ class dataHandler:
     def __init__(self):
         self.movie_lines = os.path.join(config.DATA_PATH, config.LINES_FILE)
         self.movie_conversations = os.path.join(config.DATA_PATH, config.CONVERSATIONS_FILE)
-        self.vocab_file = os.path.join('data','samples', config.VOCAB_FILE)
+        self.vocab_file = os.path.join('data', 'samples', config.VOCAB_FILE)
         self.questions, self.answers = self.load_conversations()
         int = random.randint(0, 10000)
         print('\nSample question: {}'.format(self.questions[int]))
@@ -26,6 +26,7 @@ class dataHandler:
         print('\nTokenized sample question: {}'.format(self.tokenizer.encode(self.questions[int])))
         print('\nVocab size: {}'.format(self.VOCAB_SIZE))
         self.t_questions, self.t_answers = self.tokenize_and_filter(self.questions, self.answers)
+        print('\n sample questions after padding: {}'.format(self.t_questions[int]))
         print('\nNumber of samples: {}\n'.format(len(self.t_questions)))
         self.dataset = self.create_dataset()
         print('Created dataset.\n')

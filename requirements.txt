@@ -1,6 +1,8 @@
+# Tensorflow requirements
 tf-nightly-gpu-2.0-preview
 tensorflow_datasets
 
+# Django requirements
 aioredis==1.2.0
 asgiref==2.3.2
 astroid==2.0.4
