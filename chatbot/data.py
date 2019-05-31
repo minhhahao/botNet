@@ -18,7 +18,7 @@ class dataHandler:
         int = random.randint(0, 10000)
         self.movie_lines = os.path.join(config.CHATDATA_PATH, config.LINES_FILE)
         self.movie_conversations = os.path.join(config.CHATDATA_PATH, config.CONVERSATIONS_FILE)
-        self.vocab_file = os.path.join('data', 'samples', config.VOCAB_FILE)
+        self.vocab_file = os.path.join('data', 'samples', config.VOCAB_FILENAME)
         self.vocab_dir = os.path.join(os.getcwd(), 'data', 'samples', 'vocab.subwords')
         self.questions, self.answers = self.load_conversations()
         print('\nSample question: {}'.format(self.questions[int]))
@@ -34,9 +34,9 @@ class dataHandler:
         print('\nTokenized sample question: {}'.format(self.tokenizer.encode(self.questions[int])))
         print('Vocab size: {}'.format(self.VOCAB_SIZE))
         self.t_questions, self.t_answers = self.tokenize_and_filter(self.questions, self.answers)
-        print('\nNumber of samples: {}\n'.format(len(self.t_questions)))
+        print('Number of samples: {}'.format(len(self.t_questions)))
         self.dataset = self.create_dataset()
-        print('Created dataset.\n')
+        print('\nCreated dataset.\n')
 
     def preprocess_sentence(self, sentence):
         sentence = sentence.lower().strip()

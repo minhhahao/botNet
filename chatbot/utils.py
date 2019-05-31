@@ -7,12 +7,22 @@ from __future__ import unicode_literals
 import matplotlib.pyplot as plt
 import tensorflow as tf
 import os
+import sys
 # Import files
 from . import train
-from . import model
+from . model import PositionalEncoding, encoder, encoder_layer, decoder_layer, decoder, transformer
 
 # https://github.com/AppliedDataSciencePartners/DeepReinforcementLearning/issues/3#issuecomment-420989055
 os.environ['PATH'] += os.pathsep + 'C:/Program Files (x86)/Graphviz2.38/bin/'
+
+
+def _get_user_input():
+    '''
+    Get user's input, which will be transformed into encoder input later
+    '''
+    print("> ", end="")
+    sys.stdout.flush()
+    return sys.stdin.readline()
 
 
 def draw_learning_rate():
@@ -24,7 +34,7 @@ def draw_learning_rate():
 
 
 def draw_pos_encoding():
-    sample_pos_encoding = model.PositionalEncoding(50, 512)
+    sample_pos_encoding = PositionalEncoding(50, 512)
     plt.pcolormesh(sample_pos_encoding.pos_encoding.numpy()[0], cmap='RdBu')
     plt.xlabel('Depth')
     plt.xlim((0, 512))
@@ -35,7 +45,7 @@ def draw_pos_encoding():
 
 def draw_encoder_layer():
     # Sample encoder layer
-    sample_encoder_layer = model.encoder_layer(
+    sample_encoder_layer = encoder_layer(
         units=512,
         d_model=128,
         num_heads=4,
@@ -47,7 +57,7 @@ def draw_encoder_layer():
 
 def draw_encoder():
     # Sample encoder model using n-encoder layer
-    sample_encoder = model.encoder(
+    sample_encoder = encoder(
         vocab_size=8192,
         num_layers=2,
         units=512,
@@ -61,7 +71,7 @@ def draw_encoder():
 
 def draw_decoder_layer():
     # Sample decoder layer
-    sample_decoder_layer = model.decoder_layer(
+    sample_decoder_layer = decoder_layer(
         units=512,
         d_model=128,
         num_heads=4,
@@ -73,7 +83,7 @@ def draw_decoder_layer():
 
 def draw_decoder():
     # Sample decoder model using n-decoder layer
-    sample_decoder = model.decoder(
+    sample_decoder = decoder(
         vocab_size=8192,
         num_layers=2,
         units=512,
@@ -88,7 +98,7 @@ def draw_decoder():
 def draw_transformer():
     # Sample seq2seq model with transformer
     # https://arxiv.org/pdf/1706.03762.pdf
-    sample_transformer = model.transformer(
+    sample_transformer = transformer(
         vocab_size=8192,
         num_layers=4,
         units=512,

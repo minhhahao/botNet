@@ -1,0 +1,55 @@
+
+=============================================
+20190531-153154
+Input: hello there
+Output: this is dr . smith s answering service .
+
+Input: what is your name?
+Output: nobody knows . there re my friend here .
+
+Input: name
+Output: yes sir .
+
+Input: is
+Output: what do you mean what ?
+
+Input: steve
+Output: an likely , herr mozart .
+
+Input: wow
+Output: let s go .
+
+Input: big comparison
+Output: think they re alright ?
+
+Input: they are
+Output: i suppose not , david . i have to stop and think of my dreams , d better get going .
+
+Input: i think i might train you more
+Output: is there two of us ? look at me !
+
+Input: good bye
+Output: oh , bill , i ll keep him all put this . i ll see side .
+
+Input: i will open the door
+Output: what ?
+
+=============================================
+20190531-153321
+Input: testing outputs
+Output: you tell the chief of police and living by a beautiful country . and there s got a place of place to change your mind .
+
+Input: icu right there buddy
+Output: out !
+
+Input: my name is Aaron
+Output: my john merrick .
+
+Input: hy john
+Output: stay party s too far .
+
+Input: ayy he knows
+Output: i look at him . i think he was a gun into a while . s back in the lot . can t be a small piece of shit ?
+
+Input: do you know my friend Jess?
+Output: i m trying to stop it , it s a place in your car . it s not getting a mom .patrick

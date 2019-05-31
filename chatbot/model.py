@@ -4,9 +4,7 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 # import module
-import os
 import tensorflow as tf
-import matplotlib.pyplot as plt
 
 
 def scaled_dot_product_attention(query, key, value, mask):

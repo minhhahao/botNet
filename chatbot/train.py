@@ -5,37 +5,39 @@ from __future__ import print_function
 from __future__ import unicode_literals
 # import module
 import os
-import sys
-import datetime
 import logging
 import tensorflow as tf
+from packaging import version
+import datetime
 # import file
 from . import config
 from . import data
 from . import model
+from .utils import _get_user_input
 
 # clean terminal view
 logging.getLogger('tensorflow').disabled = True
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
+print('\nTensorflow version: {}'.format(tf.__version__))
+assert version.parse(tf.__version__).release[0] >= 2, \
+    "Requirements: TensorFlow 2.0 or above."
+
 # data object
 process = data.dataHandler()
-# Log directory
 # TODO: Fixing tensorboard
-chatbotlog = 'save' + os.sep + 'chatbot_logs' + os.sep + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
-file_writer = tf.summary.create_file_writer(
-    chatbotlog + os.sep + 'scalar' + os.sep + 'metrics')
-file_writer.set_as_default()
+# model directory
+model_name = 'model-samplesSize{}-layers{}-dimension{}-units{}-dropout{}'.format(
+    config.MAX_SAMPLES, config.NUM_LAYERS, config.D_MODEL, config.UNITS, config.DROPOUT)
 # Checkpoint for weight
-checkpoint_path = os.path.join('save', 'chatbot', 'cp-{epoch:04d}.ckpt')
+checkpoint_path = os.path.join('save', 'models', model_name, 'cp-{epoch:04d}.ckpt')
 checkpoint_dir = os.path.dirname(checkpoint_path)
 cp_callback = tf.keras.callbacks.ModelCheckpoint(checkpoint_path,
                                                  verbose=1,
                                                  save_weights_only=True,
                                                  period=5)
-tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=chatbotlog,
-                                                      write_graph=True,
-                                                      write_images=True)
+# Output file when testing the model
+output_dir = os.path.join('data', 'samples', config.OUTPUT_FILE)
 
 
 # Custom learning rate schedules
@@ -57,7 +59,6 @@ class CustomSchedule(tf.keras.optimizers.schedules.LearningRateSchedule):
 
 
 def predict(model_t, sentence):
-
     def evaluate(model_t, sentence):
         sentence = process.preprocess_sentence(sentence)
         sentence = tf.expand_dims(
@@ -123,17 +124,8 @@ def create_model():
     return created_model
 
 
-def _get_user_input():
-    '''
-    Get user's input, which will be transformed into encoder input later
-    '''
-    print("> ", end="")
-    sys.stdout.flush()
-    return sys.stdin.readline()
-
-
 def train():
-    print('\n Creating models...')
+    print('\nCreating models...')
     model_train = create_model()
     print('\nModel summary: ')
     model_train.summary()
@@ -142,7 +134,7 @@ def train():
     print('\nStart training...\n')
     model_train.fit(process.dataset,
                     epochs=config.EPOCHS,
-                    callbacks=[cp_callback, tensorboard_callback])
+                    callbacks=[cp_callback])
     print('\nFinished')
     del model_train
 
@@ -150,10 +142,10 @@ def train():
 def continue_train():
     model_cont = create_model()
     model_cont.load_weights(tf.train.latest_checkpoint(checkpoint_dir))
-    print('\n Start retraining...\n')
+    print('\nStart retraining...\n')
     model_cont.fit(process.dataset,
                    epochs=config.EPOCHS,
-                   callbacks=[cp_callback, tensorboard_callback])
+                   callbacks=[cp_callback])
     model_cont.save_weights(checkpoint_path.format(epoch=0))
     del model_cont
 
@@ -161,14 +153,20 @@ def continue_train():
 def test():
     model_test = create_model()
     model_test.load_weights(tf.train.latest_checkpoint(checkpoint_dir))
+    output_file = open(output_dir, 'a+')
     try:
+        output_file.write('\n=============================================\n')
+        output_file.write(datetime.datetime.now().strftime("%Y%m%d-%H%M%S"))
         while True:
             line = _get_user_input()
             if len(line) > 0 and line[-1] == '\n':
                 line = line[:-1]
             if line == '':
                 break
-            predict(model_test, line)
+            output_file.write('\nInput: {}\n'.format(line))
+            output_file.write('Output: {}\n'.format(predict(model_test, line)))
+        output_file.write('\n=============================================\n')
+        output_file.close()
     except KeyboardInterrupt:
         print('\nTerminated')
     del model_test
