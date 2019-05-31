@@ -176,7 +176,7 @@ def draw_encoder_layer():
         dropout=0.3,
         name="sample_encoder_layer")
     tf.keras.utils.plot_model(
-        sample_encoder_layer, to_file='images' + os.sep + 'encoder_layer.png', show_shapes=True)
+        sample_encoder_layer, to_file='data' + os.sep + 'images' + os.sep + 'encoder_layer.png', show_shapes=True)
 
 
 def encoder(vocab_size,
@@ -219,7 +219,7 @@ def draw_encoder():
         dropout=0.3,
         name="sample_encoder")
     tf.keras.utils.plot_model(
-        sample_encoder, to_file='images' + os.sep + 'encoder.png', show_shapes=True)
+        sample_encoder, to_file='data' + os.sep + 'images' + os.sep + 'encoder.png', show_shapes=True)
 
 
 def decoder_layer(units, d_model, num_heads, dropout, name="decoder_layer"):
@@ -271,7 +271,7 @@ def draw_decoder_layer():
         dropout=0.3,
         name="sample_decoder_layer")
     tf.keras.utils.plot_model(
-        sample_decoder_layer, to_file='images' + os.sep + 'decoder_layer.png', show_shapes=True)
+        sample_decoder_layer, to_file='data' + os.sep + 'images' + os.sep + 'decoder_layer.png', show_shapes=True)
 
 
 def decoder(vocab_size,
@@ -319,7 +319,7 @@ def draw_decoder():
         dropout=0.3,
         name="sample_decoder")
     tf.keras.utils.plot_model(
-        sample_decoder, to_file='images' + os.sep + 'decoder.png', show_shapes=True)
+        sample_decoder, to_file='data' + os.sep + 'images' + os.sep + 'decoder.png', show_shapes=True)
 
 
 def transformer(vocab_size,
@@ -381,4 +381,4 @@ def draw_transformer():
         dropout=0.3,
         name="sample_transformer")
     tf.keras.utils.plot_model(
-        sample_transformer, to_file='images' + os.sep + 'transformer.png', show_shapes=True)
+        sample_transformer, to_file='data' + os.sep + 'images' + os.sep + 'transformer.png', show_shapes=True)

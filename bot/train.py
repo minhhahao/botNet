@@ -23,7 +23,7 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 process = data.dataHandler()
 # Log directory
 # TODO: Fixing tensorboard
-log_dir = 'logs' + os.sep + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+log_dir = 'save' + os.sep + 'logs' + os.sep + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
 file_writer = tf.summary.create_file_writer(
     log_dir + os.sep + 'scalar' + os.sep + 'metrics')
 file_writer.set_as_default()
