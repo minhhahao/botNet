@@ -7,7 +7,6 @@ from __future__ import unicode_literals
 import os
 import sys
 import datetime
-import matplotlib.pyplot as plt
 import logging
 import tensorflow as tf
 # import file
@@ -23,9 +22,9 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 process = data.dataHandler()
 # Log directory
 # TODO: Fixing tensorboard
-log_dir = 'save' + os.sep + 'chatbot_logs' + os.sep + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+chatbotlog = 'save' + os.sep + 'chatbot_logs' + os.sep + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
 file_writer = tf.summary.create_file_writer(
-    log_dir + os.sep + 'scalar' + os.sep + 'metrics')
+    chatbotlog + os.sep + 'scalar' + os.sep + 'metrics')
 file_writer.set_as_default()
 # Checkpoint for weight
 checkpoint_path = os.path.join('save', 'chatbot', 'cp-{epoch:04d}.ckpt')
@@ -34,7 +33,7 @@ cp_callback = tf.keras.callbacks.ModelCheckpoint(checkpoint_path,
                                                  verbose=1,
                                                  save_weights_only=True,
                                                  period=5)
-tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir,
+tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=chatbotlog,
                                                       write_graph=True,
                                                       write_images=True)
 
@@ -55,14 +54,6 @@ class CustomSchedule(tf.keras.optimizers.schedules.LearningRateSchedule):
         arg2 = step * (self.warmup_steps**-1.5)
 
         return tf.math.rsqrt(self.d_model) * tf.math.minimum(arg1, arg2)
-
-
-def draw_learning_rate():
-    # Visualise sample learning curve
-    sample_learning_rate = CustomSchedule(d_model=128)
-    plt.ylabel("Learning Rate")
-    plt.xlabel("Train Step")
-    plt.plot(sample_learning_rate(tf.range(200000, dtype=tf.float32)))
 
 
 def predict(model_t, sentence):

@@ -15,18 +15,25 @@ from . import config
 
 class dataHandler:
     def __init__(self):
-        self.movie_lines = os.path.join(config.DATA_PATH, config.LINES_FILE)
-        self.movie_conversations = os.path.join(config.DATA_PATH, config.CONVERSATIONS_FILE)
-        self.vocab_file = os.path.join('data', 'samples', config.VOCAB_FILE)
-        self.questions, self.answers = self.load_conversations()
         int = random.randint(0, 10000)
+        self.movie_lines = os.path.join(config.CHATDATA_PATH, config.LINES_FILE)
+        self.movie_conversations = os.path.join(config.CHATDATA_PATH, config.CONVERSATIONS_FILE)
+        self.vocab_file = os.path.join('data', 'samples', config.VOCAB_FILE)
+        self.vocab_dir = os.path.join(os.getcwd(), 'data', 'samples', 'vocab.subwords')
+        self.questions, self.answers = self.load_conversations()
         print('\nSample question: {}'.format(self.questions[int]))
-        print('\nSample answer: {}'.format(self.answers[int]))
-        self.tokenizer, self.START_TOKEN, self.END_TOKEN, self.VOCAB_SIZE = self.tokenizer()
+        print('Sample answer: {}'.format(self.answers[int]))
+        if os.path.exists(self.vocab_dir):
+            print('\nTokenizer already initialized. Loading from file...')
+            self.tokenizer = tfds.features.text.SubwordTextEncoder.load_from_file(self.vocab_file)
+        else:
+            print('\nCreating new tokenizer...')
+            self.tokenizer = self.create_tokenizer()
+            print('Finished creating tokenizer')
+        self.START_TOKEN, self.END_TOKEN, self.VOCAB_SIZE = self.misc_token(self.tokenizer)
         print('\nTokenized sample question: {}'.format(self.tokenizer.encode(self.questions[int])))
-        print('\nVocab size: {}'.format(self.VOCAB_SIZE))
+        print('Vocab size: {}'.format(self.VOCAB_SIZE))
         self.t_questions, self.t_answers = self.tokenize_and_filter(self.questions, self.answers)
-        print('\nSample questions after padding: {}'.format(self.t_questions[int]))
         print('\nNumber of samples: {}\n'.format(len(self.t_questions)))
         self.dataset = self.create_dataset()
         print('Created dataset.\n')
@@ -67,20 +74,21 @@ class dataHandler:
                         return inputs, outputs
         return inputs, outputs
 
-    def tokenizer(self):
-        # Build tokenizer using tfds for both questions and answers
-        tokenizer = tfds.features.text.SubwordTextEncoder.build_from_corpus(
-            self.questions + self.answers, target_vocab_size=2**13)
-        if os.path.isfile(self.vocab_file):
-            print('Vocab file exists.')
-        else:
-            tokenizer.save_to_file(self.vocab_file)
+    def misc_token(self, tokenizer):
+        # Return start token, end token, and vocab size
         # Define start and end token to indicate the start and end of a sentence
         START_TOKEN, END_TOKEN = [tokenizer.vocab_size], [
             tokenizer.vocab_size + 1]
         # Vocabulary size plus start and end token
         VOCAB_SIZE = tokenizer.vocab_size + 2
-        return tokenizer, START_TOKEN, END_TOKEN, VOCAB_SIZE
+        return START_TOKEN, END_TOKEN, VOCAB_SIZE
+
+    def create_tokenizer(self):
+        # Build tokenizer using tfds for both questions and answers
+        tokenizer = tfds.features.text.SubwordTextEncoder.build_from_corpus(
+            self.questions + self.answers, target_vocab_size=2**13)
+        tokenizer.save_to_file(self.vocab_file)
+        return tokenizer
 
     # Tokenize, filter and pad sentences
     def tokenize_and_filter(self, inputs, outputs):

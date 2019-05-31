@@ -2,7 +2,7 @@ import os
 
 VERSION = 1
 # Init path
-DATA_PATH = os.path.join('data', 'cornell')
+CHATDATA_PATH = os.path.join('data', 'cornell')
 LINES_FILE = 'movie_lines.txt'
 CONVERSATIONS_FILE = 'movie_conversations.txt'
 VOCAB_FILE = 'vocab'
