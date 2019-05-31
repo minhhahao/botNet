@@ -23,12 +23,12 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 process = data.dataHandler()
 # Log directory
 # TODO: Fixing tensorboard
-log_dir = 'save' + os.sep + 'logs' + os.sep + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+log_dir = 'save' + os.sep + 'chatbot_logs' + os.sep + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
 file_writer = tf.summary.create_file_writer(
     log_dir + os.sep + 'scalar' + os.sep + 'metrics')
 file_writer.set_as_default()
 # Checkpoint for weight
-checkpoint_path = os.path.join('save', 'cp-{epoch:04d}.ckpt')
+checkpoint_path = os.path.join('save', 'chatbot', 'cp-{epoch:04d}.ckpt')
 checkpoint_dir = os.path.dirname(checkpoint_path)
 cp_callback = tf.keras.callbacks.ModelCheckpoint(checkpoint_path,
                                                  verbose=1,

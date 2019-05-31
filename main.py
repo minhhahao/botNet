@@ -1,3 +1,3 @@
-from bot.train import run
+from chatbot.train import run
 
 run()
