@@ -9,7 +9,6 @@ import logging
 import tensorflow as tf
 from packaging import version
 import datetime
-import time
 # import file
 from . import config
 from . import data
@@ -27,7 +26,7 @@ assert version.parse(tf.__version__).release[0] >= 2, \
 # data object
 process = data.dataHandler()
 # TODO: Fixing tensorboard
-tensorboard = tf.keras.callbacks.TensorBoard(log_dir=config.LOG_DIR.format(time()))
+tensorboard = tf.keras.callbacks.TensorBoard(log_dir=config.LOG_DIR.format(datetime.datetime.now().strftime("%Y%m%d-%H%M%S")))
 # model directory
 model_name = 'model-maxVocabSize{}-layers{}-dimension{}-units{}-dropout{}'.format(
     config.MAX_VOCAB_SIZE, config.NUM_LAYERS, config.D_MODEL, config.UNITS, config.DROPOUT)
