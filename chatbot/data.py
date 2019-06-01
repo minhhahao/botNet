@@ -5,50 +5,33 @@ from __future__ import print_function
 from __future__ import unicode_literals
 # import module
 import os
-import re
 import random
 import tensorflow_datasets as tfds
 import tensorflow as tf
 # import file
 from . import config
+from .utils import preprocess_sentence
 
 
 class dataHandler:
     def __init__(self):
         int = random.randint(0, 10000)
+        # Preprocessing data from Cornell corpus
         self.movie_lines = os.path.join(config.CHATDATA_PATH, config.LINES_FILE)
         self.movie_conversations = os.path.join(config.CHATDATA_PATH, config.CONVERSATIONS_FILE)
-        self.vocab_file = os.path.join('data', 'samples', config.VOCAB_FILENAME)
-        self.vocab_dir = os.path.join(os.getcwd(), 'data', 'samples', 'vocab.subwords')
         self.questions, self.answers = self.load_conversations()
         print('\nSample question: {}'.format(self.questions[int]))
         print('Sample answer: {}'.format(self.answers[int]))
-        if os.path.exists(self.vocab_dir):
-            print('\nTokenizer already initialized. Loading from file...')
-            self.tokenizer = tfds.features.text.SubwordTextEncoder.load_from_file(self.vocab_file)
-        else:
-            print('\nCreating new tokenizer...')
-            self.tokenizer = self.create_tokenizer()
-            print('Finished creating tokenizer')
+        # Processing dataset from given data
+        self.tokenizer = self.load_tokenizer()
         self.START_TOKEN, self.END_TOKEN, self.VOCAB_SIZE = self.misc_token(self.tokenizer)
         print('\nTokenized sample question: {}'.format(self.tokenizer.encode(self.questions[int])))
         print('Vocab size: {}'.format(self.VOCAB_SIZE))
+        # Padding and tokenizer to the tensor size
         self.t_questions, self.t_answers = self.tokenize_and_filter(self.questions, self.answers)
         print('Number of samples: {}'.format(len(self.t_questions)))
         self.dataset = self.create_dataset()
         print('\nCreated dataset.\n')
-
-    def preprocess_sentence(self, sentence):
-        sentence = sentence.lower().strip()
-        # creating a space between a word and the punctuation following it
-        # eg: "he is a boy." => "he is a boy ."
-        sentence = re.sub(r"([?.!,])", r" \1 ", sentence)
-        sentence = re.sub(r'[" "]+', " ", sentence)
-        # replacing everything with space except (a-z, A-Z, ".", "?", "!", ",")
-        sentence = re.sub(r"[^a-zA-Z?.!,]+", " ", sentence)
-        sentence = sentence.strip()
-        # adding a start and an end token to the sentence
-        return sentence
 
     def load_conversations(self):
         # dictionary of line id to text
@@ -66,9 +49,9 @@ class dataHandler:
                 conversation = [line[1:-1]
                                 for line in parts[3][1:-1].split(', ')]
                 for i in range(len(conversation) - 1):
-                    inputs.append(self.preprocess_sentence(
+                    inputs.append(preprocess_sentence(
                         id2line[conversation[i]]))
-                    outputs.append(self.preprocess_sentence(
+                    outputs.append(preprocess_sentence(
                         id2line[conversation[i + 1]]))
                     if len(inputs) >= config.MAX_SAMPLES:
                         return inputs, outputs
@@ -83,11 +66,25 @@ class dataHandler:
         VOCAB_SIZE = tokenizer.vocab_size + 2
         return START_TOKEN, END_TOKEN, VOCAB_SIZE
 
-    def create_tokenizer(self):
-        # Build tokenizer using tfds for both questions and answers
-        tokenizer = tfds.features.text.SubwordTextEncoder.build_from_corpus(
-            self.questions + self.answers, target_vocab_size=2**13)
-        tokenizer.save_to_file(self.vocab_file)
+    def load_tokenizer(self):
+        #  tfds is kinda dank
+        name_without_ext = config.VOCAB_FILENAME.format(config.MAX_SAMPLES, config.MAX_VOCAB_SIZE)
+        name_with_ext = '{}.subwords'.format(name_without_ext)
+        vocab_filename = os.path.join(config.VOCAB_PATH, name_without_ext)
+        vocab_filepath = os.path.join(config.VOCAB_PATH, name_with_ext)
+
+        def create_tokenizer():
+            # Build tokenizer using tfds for both questions and answers
+            tokenizer = tfds.features.text.SubwordTextEncoder.build_from_corpus(self.questions + self.answers,
+                                                                                target_vocab_size=config.MAX_VOCAB_SIZE)
+            tokenizer.save_to_file(vocab_filename)
+            return tokenizer
+        if not os.path.exists(vocab_filepath):
+            print('\nCreating new tokenizer...')
+            tokenizer = create_tokenizer()
+        else:
+            print('\nTokenizer already initialized. Loading from file...')
+            tokenizer = tfds.features.text.SubwordTextEncoder.load_from_file(vocab_filename)
         return tokenizer
 
     # Tokenize, filter and pad sentences

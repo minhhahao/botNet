@@ -9,11 +9,12 @@ import logging
 import tensorflow as tf
 from packaging import version
 import datetime
+import time
 # import file
 from . import config
 from . import data
 from . import model
-from .utils import _get_user_input
+from .utils import _get_user_input, preprocess_sentence
 
 # clean terminal view
 logging.getLogger('tensorflow').disabled = True
@@ -26,15 +27,18 @@ assert version.parse(tf.__version__).release[0] >= 2, \
 # data object
 process = data.dataHandler()
 # TODO: Fixing tensorboard
+tensorboard = tf.keras.callbacks.TensorBoard(log_dir=config.LOG_DIR.format(time()))
 # model directory
-model_name = 'model-samplesSize{}-layers{}-dimension{}-units{}-dropout{}'.format(
-    config.MAX_SAMPLES, config.NUM_LAYERS, config.D_MODEL, config.UNITS, config.DROPOUT)
+model_name = 'model-maxVocabSize{}-layers{}-dimension{}-units{}-dropout{}'.format(
+    config.MAX_VOCAB_SIZE, config.NUM_LAYERS, config.D_MODEL, config.UNITS, config.DROPOUT)
 # Checkpoint for weight
-checkpoint_path = os.path.join('save', 'models', model_name, 'cp-{epoch:04d}.ckpt')
+checkpoint_path = os.path.join(
+    'save', 'models', model_name, 'checkpoint.ckpt')
 checkpoint_dir = os.path.dirname(checkpoint_path)
-cp_callback = tf.keras.callbacks.ModelCheckpoint(checkpoint_path,
+checkpoints = tf.keras.callbacks.ModelCheckpoint(checkpoint_path,
                                                  verbose=1,
                                                  save_weights_only=True,
+                                                 save_best_only=True,
                                                  period=5)
 # Output file when testing the model
 output_dir = os.path.join('data', 'samples', config.OUTPUT_FILE)
@@ -60,7 +64,7 @@ class CustomSchedule(tf.keras.optimizers.schedules.LearningRateSchedule):
 
 def predict(model_t, sentence):
     def evaluate(model_t, sentence):
-        sentence = process.preprocess_sentence(sentence)
+        sentence = preprocess_sentence(sentence)
         sentence = tf.expand_dims(
             process.START_TOKEN + process.tokenizer.encode(sentence) + process.END_TOKEN, axis=0)
 
@@ -134,7 +138,7 @@ def train():
     print('\nStart training...\n')
     model_train.fit(process.dataset,
                     epochs=config.EPOCHS,
-                    callbacks=[cp_callback])
+                    callbacks=[checkpoints, tensorboard])
     print('\nFinished')
     del model_train
 
@@ -145,8 +149,8 @@ def continue_train():
     print('\nStart retraining...\n')
     model_cont.fit(process.dataset,
                    epochs=config.EPOCHS,
-                   callbacks=[cp_callback])
-    model_cont.save_weights(checkpoint_path.format(epoch=0))
+                   callbacks=[checkpoints, tensorboard])
+    model_cont.save_weights(checkpoint_path)
     del model_cont
 
 

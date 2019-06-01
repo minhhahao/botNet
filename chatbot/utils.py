@@ -7,104 +7,115 @@ from __future__ import unicode_literals
 import matplotlib.pyplot as plt
 import tensorflow as tf
 import os
+import re
 import sys
 # Import files
 from . import train
-from . model import PositionalEncoding, encoder, encoder_layer, decoder_layer, decoder, transformer
+from .model import PositionalEncoding, encoder, encoder_layer, decoder, decoder_layer, transformer
 
+# Fixes for drawing images
 # https://github.com/AppliedDataSciencePartners/DeepReinforcementLearning/issues/3#issuecomment-420989055
 os.environ['PATH'] += os.pathsep + 'C:/Program Files (x86)/Graphviz2.38/bin/'
 
 
+def preprocess_sentence(sentence):
+    sentence = sentence.lower().strip()
+    # creating a space between a word and the punctuation following it
+    # eg: "he is a boy." => "he is a boy ."
+    sentence = re.sub(r"([?.!,])", r" \1 ", sentence)
+    sentence = re.sub(r'[" "]+', " ", sentence)
+    # replacing everything with space except (a-z, A-Z, ".", "?", "!", ",")
+    sentence = re.sub(r"[^a-zA-Z?.!,]+", " ", sentence)
+    sentence = sentence.strip()
+    # adding a start and an end token to the sentence
+    return sentence
+
+
 def _get_user_input():
-    '''
-    Get user's input, which will be transformed into encoder input later
-    '''
+    '''Get user's input, which will be transformed into encoder input later'''
     print("> ", end="")
     sys.stdout.flush()
     return sys.stdin.readline()
 
 
-def draw_learning_rate():
-    # Visualise sample learning curve
-    sample_learning_rate = train.CustomSchedule(d_model=128)
-    plt.ylabel("Learning Rate")
-    plt.xlabel("Train Step")
-    plt.plot(sample_learning_rate(tf.range(200000, dtype=tf.float32)))
+class Draw:
+    def __init__(self):
+        pass
 
+    def draw_learning_rate(self):
+        # Visualise sample learning curve
+        sample_learning_rate = train.CustomSchedule(d_model=128)
+        plt.ylabel("Learning Rate")
+        plt.xlabel("Train Step")
+        plt.plot(sample_learning_rate(tf.range(200000, dtype=tf.float32)))
 
-def draw_pos_encoding():
-    sample_pos_encoding = PositionalEncoding(50, 512)
-    plt.pcolormesh(sample_pos_encoding.pos_encoding.numpy()[0], cmap='RdBu')
-    plt.xlabel('Depth')
-    plt.xlim((0, 512))
-    plt.ylabel('Position')
-    plt.colorbar()
-    plt.show()
+    def draw_pos_encoding(self):
+        sample_pos_encoding = PositionalEncoding(50, 512)
+        plt.pcolormesh(sample_pos_encoding.pos_encoding.numpy()[0], cmap='RdBu')
+        plt.xlabel('Depth')
+        plt.xlim((0, 512))
+        plt.ylabel('Position')
+        plt.colorbar()
+        plt.show()
 
+    def draw_encoder_layer(self):
+        # Sample encoder layer
+        sample_encoder_layer = encoder_layer(
+            units=512,
+            d_model=128,
+            num_heads=4,
+            dropout=0.3,
+            name="sample_encoder_layer")
+        tf.keras.utils.plot_model(
+            sample_encoder_layer, to_file='data' + os.sep + 'images' + os.sep + 'encoder_layer.png', show_shapes=True)
 
-def draw_encoder_layer():
-    # Sample encoder layer
-    sample_encoder_layer = encoder_layer(
-        units=512,
-        d_model=128,
-        num_heads=4,
-        dropout=0.3,
-        name="sample_encoder_layer")
-    tf.keras.utils.plot_model(
-        sample_encoder_layer, to_file='data' + os.sep + 'images' + os.sep + 'encoder_layer.png', show_shapes=True)
+    def draw_encoder(self):
+        # Sample encoder model using n-encoder layer
+        sample_encoder = encoder(
+            vocab_size=8192,
+            num_layers=2,
+            units=512,
+            d_model=128,
+            num_heads=4,
+            dropout=0.3,
+            name="sample_encoder")
+        tf.keras.utils.plot_model(
+            sample_encoder, to_file='data' + os.sep + 'images' + os.sep + 'encoder.png', show_shapes=True)
 
+    def draw_decoder_layer(self):
+        # Sample decoder layer
+        sample_decoder_layer = decoder_layer(
+            units=512,
+            d_model=128,
+            num_heads=4,
+            dropout=0.3,
+            name="sample_decoder_layer")
+        tf.keras.utils.plot_model(
+            sample_decoder_layer, to_file='data' + os.sep + 'images' + os.sep + 'decoder_layer.png', show_shapes=True)
 
-def draw_encoder():
-    # Sample encoder model using n-encoder layer
-    sample_encoder = encoder(
-        vocab_size=8192,
-        num_layers=2,
-        units=512,
-        d_model=128,
-        num_heads=4,
-        dropout=0.3,
-        name="sample_encoder")
-    tf.keras.utils.plot_model(
-        sample_encoder, to_file='data' + os.sep + 'images' + os.sep + 'encoder.png', show_shapes=True)
+    def draw_decoder(self):
+        # Sample decoder model using n-decoder layer
+        sample_decoder = decoder(
+            vocab_size=8192,
+            num_layers=2,
+            units=512,
+            d_model=128,
+            num_heads=4,
+            dropout=0.3,
+            name="sample_decoder")
+        tf.keras.utils.plot_model(
+            sample_decoder, to_file='data' + os.sep + 'images' + os.sep + 'decoder.png', show_shapes=True)
 
-
-def draw_decoder_layer():
-    # Sample decoder layer
-    sample_decoder_layer = decoder_layer(
-        units=512,
-        d_model=128,
-        num_heads=4,
-        dropout=0.3,
-        name="sample_decoder_layer")
-    tf.keras.utils.plot_model(
-        sample_decoder_layer, to_file='data' + os.sep + 'images' + os.sep + 'decoder_layer.png', show_shapes=True)
-
-
-def draw_decoder():
-    # Sample decoder model using n-decoder layer
-    sample_decoder = decoder(
-        vocab_size=8192,
-        num_layers=2,
-        units=512,
-        d_model=128,
-        num_heads=4,
-        dropout=0.3,
-        name="sample_decoder")
-    tf.keras.utils.plot_model(
-        sample_decoder, to_file='data' + os.sep + 'images' + os.sep + 'decoder.png', show_shapes=True)
-
-
-def draw_transformer():
-    # Sample seq2seq model with transformer
-    # https://arxiv.org/pdf/1706.03762.pdf
-    sample_transformer = transformer(
-        vocab_size=8192,
-        num_layers=4,
-        units=512,
-        d_model=128,
-        num_heads=4,
-        dropout=0.3,
-        name="sample_transformer")
-    tf.keras.utils.plot_model(
-        sample_transformer, to_file='data' + os.sep + 'images' + os.sep + 'transformer.png', show_shapes=True)
+    def draw_transformer(self):
+        # Sample seq2seq model with transformer
+        # https://arxiv.org/pdf/1706.03762.pdf
+        sample_transformer = transformer(
+            vocab_size=8192,
+            num_layers=4,
+            units=512,
+            d_model=128,
+            num_heads=4,
+            dropout=0.3,
+            name="sample_transformer")
+        tf.keras.utils.plot_model(
+            sample_transformer, to_file='data' + os.sep + 'images' + os.sep + 'transformer.png', show_shapes=True)
