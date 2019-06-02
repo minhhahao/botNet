@@ -1,4 +1,5 @@
 # Tensorflow requirements
 tf-nightly-gpu-2.0-preview
+tb-nightly
 tensorflow_datasets
 packaging
