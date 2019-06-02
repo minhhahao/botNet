@@ -1,3 +1,5 @@
-from chatbot.train import run
+from chatbot import botNet
 
-run()
+if __name__ == '__main__':
+    bot = botNet.botNet()
+    bot.main()

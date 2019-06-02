@@ -1,2 +1,4 @@
 # Contains tokenizer file and output.txt
-maxSize*
+*
+!.gitignore
+!output.txt

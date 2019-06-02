@@ -3,12 +3,23 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
+
 # import module
 import tensorflow as tf
 
-
 def scaled_dot_product_attention(query, key, value, mask):
-    '''Calculate the attention weights.'''
+    '''
+    Calculate the attention weights.
+    Compute dot products of query with all keys divide by sqrt(d_k):
+        tf.matmul(query, key, transpose_b=True)/tf.math.sqrt(depth)
+    then apply softmax(logits, axis=-1) to obtain the weight
+    args:
+        query, key <int>: of dimension d_k
+        value <int>: of dimension d_v
+        mask <int>: mask for padding value
+    returns:
+        output <float32>: attention value
+    '''
     matmul_qk = tf.matmul(query, key, transpose_b=True)
 
     # scale matmul_qk
@@ -27,25 +38,15 @@ def scaled_dot_product_attention(query, key, value, mask):
     return output
 
 
-def create_padding_mask(x):
-    mask = tf.cast(tf.math.equal(x, 0), tf.float32)
-    # (batch_size, 1, 1, sequence length)
-    return mask[:, tf.newaxis, tf.newaxis, :]
-
-
-def create_look_ahead_mask(x):
-    seq_len = tf.shape(x)[1]
-    look_ahead_mask = 1 - \
-        tf.linalg.band_part(tf.ones((seq_len, seq_len)), -1, 0)
-    padding_mask = create_padding_mask(x)
-    return tf.maximum(look_ahead_mask, padding_mask)
-
-
-# print(create_padding_mask(tf.constant([[1, 2, 0, 3, 0], [0, 0, 0, 4, 5]])))
-# print(create_look_ahead_mask(tf.constant([[1, 2, 0, 4, 5]])))
-
-
 class MultiHeadAttention(tf.keras.layers.Layer):
+    '''
+        Performing scaled-dot product attention in parallel for faster computation and space-efficiency
+        args:
+            d_model <int>: dimension of the model
+            num_heads <int>: numbers of parallel layers
+        returns:
+            output <float32>: the probability of a word
+    '''
 
     def __init__(self, d_model, num_heads, name="multi_head_attention"):
         super(MultiHeadAttention, self).__init__(name=name)
@@ -83,8 +84,7 @@ class MultiHeadAttention(tf.keras.layers.Layer):
         value = self.split_heads(value, batch_size)
 
         # scaled dot-product attention
-        scaled_attention = scaled_dot_product_attention(
-            query, key, value, mask)
+        scaled_attention = scaled_dot_product_attention(query, key, value, mask)
 
         scaled_attention = tf.transpose(scaled_attention, perm=[0, 2, 1, 3])
 
@@ -98,15 +98,39 @@ class MultiHeadAttention(tf.keras.layers.Layer):
         return outputs
 
 
-class PositionalEncoding(tf.keras.layers.Layer):
+def create_padding_mask(x):
+    '''Padding mask'''
+    mask = tf.cast(tf.math.equal(x, 0), tf.float32)
+    # (batch_size, 1, 1, sequence length)
+    return mask[:, tf.newaxis, tf.newaxis, :]
 
+
+def create_look_ahead_mask(x):
+    '''uwu future mask =))'''
+    seq_len = tf.shape(x)[1]
+    look_ahead_mask = 1 - tf.linalg.band_part(tf.ones((seq_len, seq_len)), -1, 0)
+    padding_mask = create_padding_mask(x)
+    return tf.maximum(look_ahead_mask, padding_mask)
+
+
+class PositionalEncoding(tf.keras.layers.Layer):
+    '''
+    Indicate the positions of the model since there is no reccurence and convolution involved
+    This can be calculated:
+        PE_(pos,2i)   = tf.math.sin(angle_rads[:, 0::2]) with angle_rads = self.get_angles(...)
+        PE_(pos,2i+1) = tf.math.cos(angle_rads[:, 1::2])
+    Added concat() for linearization
+    args:
+        position <float32>: returns the position of the model
+    returns:
+        inputs or outputs with corresponding PE
+    '''
     def __init__(self, position, d_model):
         super(PositionalEncoding, self).__init__()
         self.pos_encoding = self.positional_encoding(position, d_model)
 
     def get_angles(self, position, i, d_model):
-        angles = 1 / tf.pow(10000, (2 * (i // 2)) /
-                            tf.cast(d_model, tf.float32))
+        angles = 1 / tf.pow(10000, (2 * (i // 2)) / tf.cast(d_model, tf.float32))
         return position * angles
 
     def positional_encoding(self, position, d_model):
@@ -128,6 +152,7 @@ class PositionalEncoding(tf.keras.layers.Layer):
 
 
 def encoder_layer(units, d_model, num_heads, dropout, name="encoder_layer"):
+    '''Create an encoder layer'''
     inputs = tf.keras.Input(shape=(None, d_model), name="inputs")
     padding_mask = tf.keras.Input(shape=(1, 1, None), name="padding_mask")
 
@@ -159,6 +184,7 @@ def encoder(vocab_size,
             num_heads,
             dropout,
             name="encoder"):
+    '''Encoder model including n encoder_layers'''
     inputs = tf.keras.Input(shape=(None,), name="inputs")
     padding_mask = tf.keras.Input(shape=(1, 1, None), name="padding_mask")
 
@@ -182,6 +208,7 @@ def encoder(vocab_size,
 
 
 def decoder_layer(units, d_model, num_heads, dropout, name="decoder_layer"):
+    '''Create an decoder layer'''
     inputs = tf.keras.Input(shape=(None, d_model), name="inputs")
     enc_outputs = tf.keras.Input(shape=(None, d_model), name="encoder_outputs")
     look_ahead_mask = tf.keras.Input(
@@ -228,6 +255,7 @@ def decoder(vocab_size,
             num_heads,
             dropout,
             name='decoder'):
+    '''Decoder model including n decoder_layers'''
     inputs = tf.keras.Input(shape=(None,), name='inputs')
     enc_outputs = tf.keras.Input(shape=(None, d_model), name='encoder_outputs')
     look_ahead_mask = tf.keras.Input(
@@ -262,6 +290,7 @@ def transformer(vocab_size,
                 num_heads,
                 dropout,
                 name="transformer"):
+    '''Transformer model with n-layers of encoder-decoder'''
     inputs = tf.keras.Input(shape=(None,), name="inputs")
     dec_inputs = tf.keras.Input(shape=(None,), name="dec_inputs")
 
@@ -296,7 +325,6 @@ def transformer(vocab_size,
         dropout=dropout,
     )(inputs=[dec_inputs, enc_outputs, look_ahead_mask, dec_padding_mask])
 
-    outputs = tf.keras.layers.Dense(
-        units=vocab_size, name="outputs")(dec_outputs)
+    outputs = tf.keras.layers.Dense(units=vocab_size, name="outputs")(dec_outputs)
 
     return tf.keras.Model(inputs=[inputs, dec_inputs], outputs=outputs, name=name)

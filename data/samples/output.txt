@@ -215,3 +215,47 @@ Output: probably . but we can t win alone . we know that . this is the only happ
 
 Input: where have you been?
 Output: taking my pleasure . do i need to clear my lovers with you ?
+
+=============================================
+20190601-190422
+Input: hello
+Output: mrs . robinson ?
+
+Input: its aaron
+Output: if a boy i d like to hear you say it might be a thousand fred .
+
+Input: what is your name?
+Output: norman . i m not getting any more .
+
+Input: hi norman
+Output: . . . do you mean ?
+
+Input: do you like ice cream?
+Output: yeah , well , you know how it is .
+
+Input: good lad
+Output: what if i told him i m in the ground here , i d have to take a look at this , he s a visa for the sunk of the ministry .
+
+Input: cool
+Output: what was it ?
+
+Input: im going to London
+Output: well rick , you know how much information can do this for me ? you do see that .
+
+Input: i do 
+Output: i don t like to go home and a little girl .
+
+Input: you sounds like a pedophile
+Output: no , it was calm .
+
+Input: ok
+Output: you ll always say . this is your first time .
+
+Input: ok
+Output: you ll always say . this is your first time .
+
+Input: cool
+Output: what was it ?
+
+Input: bye
+Output: well goodbye , ma am . but you re very allowed in jazz does not even know any of that place to go . it s too much trouble .

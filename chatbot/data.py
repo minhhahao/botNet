@@ -1,116 +1,133 @@
+'''
+    Descriptions: Data Preprocessing with tfds
+        Corpus: Cornell Movie Dialogs (default)
+        TODO: increase database size
+'''
 # import future
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
+
 # import module
 import os
-import random
-import tensorflow_datasets as tfds
+import random  # Debugging purposes
+import tensorflow_datasets as tfds  # Dataset processing because I'm kinda lazy
 import tensorflow as tf
-# import file
-from . import config
+
+# import module from file
 from .utils import preprocess_sentence
 
-
 class dataHandler:
-    def __init__(self):
-        int = random.randint(0, 10000)
+    '''
+    Processing datafile
+    returns:
+        dataset <obj>: tokenized mini-batch
+        questions, answers list(<str>): correspondingly list of inputs and outputs for encoder-decoder
+        tokenizer <obj>: Tensorflow tokenizer
+        START_TOKEN, END_TOKEN <int>: dynamic START_TOKEN, END_TOKEN for padding (TODO: try normal fixed token)
+        t_questions, t_answers list(<str>): tokenized questions, answers
+    '''
+
+    def __init__(self, args):
+        '''
+        args:
+            args (list<str>): arguments for processing data
+        '''
+        self.args = args
+        # Init path
+        self.DATA_PATH = 'data'
+        self.VOCAB_PATH = 'samples'
+
+        # Filename
+        self.VOCAB_NO_EXT = self._construct_vocab_path()
+        self.VOCAB_FILE = '{}.subwords'.format(self.VOCAB_NO_EXT)
+        # random int for debugging
+        self.int = random.randint(0, 10000)
+        self.process_data()
+
+    def process_data(self):
+        '''driver code'''
         # Preprocessing data from Cornell corpus
-        self.movie_lines = os.path.join(config.CHATDATA_PATH, config.LINES_FILE)
-        self.movie_conversations = os.path.join(config.CHATDATA_PATH, config.CONVERSATIONS_FILE)
-        self.questions, self.answers = self.load_conversations()
-        print('\nSample question: {}'.format(self.questions[int]))
-        print('Sample answer: {}'.format(self.answers[int]))
+        self.questions, self.answers = self.process_cornell()
         # Processing dataset from given data
-        self.tokenizer = self.load_tokenizer()
-        self.START_TOKEN, self.END_TOKEN, self.VOCAB_SIZE = self.misc_token(self.tokenizer)
-        print('\nTokenized sample question: {}'.format(self.tokenizer.encode(self.questions[int])))
-        print('Vocab size: {}'.format(self.VOCAB_SIZE))
+        self.tokenizer, self.START_TOKEN, self.END_TOKEN = self.load_tokenizer()
         # Padding and tokenizer to the tensor size
         self.t_questions, self.t_answers = self.tokenize_and_filter(self.questions, self.answers)
-        print('Number of samples: {}'.format(len(self.t_questions)))
+        # Create Dataset
         self.dataset = self.create_dataset()
-        print('\nCreated dataset.\n')
+        if self.args.verbose:
+            print('\nSample question: {}'.format(self.questions[self.int]))
+            print('Sample answer: {}'.format(self.answers[self.int]))
+            print('\nTokenized sample question: {}'.format(self.tokenizer.encode(self.questions[self.int])))
+            print('\nNumber of samples: {}'.format(len(self.t_questions)))
+            print('\nCreated dataset.\n')
 
-    def load_conversations(self):
+    def _construct_vocab_path(self):
+        '''Construct path for vocab file without extension (tfds compatibility)'''
+        path = os.path.join(self.DATA_PATH, self.VOCAB_PATH) + os.sep + 'vocab-{}-size{}'.format(self.args.corpus, self.args.vocab_size)
+        return path
+
+    def process_cornell(self):
+        '''Process data from Cornell corpus'''
         # dictionary of line id to text
+        movie_lines = os.path.join(self.DATA_PATH, 'cornell', 'movie_lines.txt')
+        movie_conversations = os.path.join(self.DATA_PATH, 'cornell', 'movie_conversations.txt')
+
+        # Put lines into dict with {key:line, value:lineID}
         id2line = {}
-        with open(self.movie_lines, errors='ignore') as file:
+        with open(movie_lines, 'r', errors='ignore', encoding='utf-8') as file:
             for line in file.readlines():
                 parts = line.replace('\n', '').split(' +++$+++ ')
                 id2line[parts[0]] = parts[4]
 
         inputs, outputs = [], []
-        with open(self.movie_conversations, 'r') as file:
+        with open(movie_conversations, 'r', errors='ignore', encoding='utf-8') as file:
             for line in file.readlines():
                 parts = line.replace('\n', '').split(' +++$+++ ')
                 # get conversation in a list of line ID
-                conversation = [line[1:-1]
-                                for line in parts[3][1:-1].split(', ')]
+                conversation = [line[1:-1] for line in parts[3][1:-1].split(', ')]
                 for i in range(len(conversation) - 1):
-                    inputs.append(preprocess_sentence(
-                        id2line[conversation[i]]))
-                    outputs.append(preprocess_sentence(
-                        id2line[conversation[i + 1]]))
-                    if len(inputs) >= config.MAX_SAMPLES:
+                    inputs.append(preprocess_sentence(id2line[conversation[i]]))
+                    outputs.append(preprocess_sentence(id2line[conversation[i + 1]]))
+                    if len(inputs) >= self.args.max_samples:
                         return inputs, outputs
+
         return inputs, outputs
 
-    def misc_token(self, tokenizer):
-        # Return start token, end token, and vocab size
-        # Define start and end token to indicate the start and end of a sentence
-        START_TOKEN, END_TOKEN = [tokenizer.vocab_size], [
-            tokenizer.vocab_size + 1]
-        # Vocabulary size plus start and end token
-        VOCAB_SIZE = tokenizer.vocab_size + 2
-        return START_TOKEN, END_TOKEN, VOCAB_SIZE
-
     def load_tokenizer(self):
-        #  tfds is kinda dank
-        name_without_ext = config.VOCAB_FILENAME.format(config.MAX_SAMPLES, config.MAX_VOCAB_SIZE)
-        name_with_ext = '{}.subwords'.format(name_without_ext)
-        vocab_filename = os.path.join(config.VOCAB_PATH, name_without_ext)
-        vocab_filepath = os.path.join(config.VOCAB_PATH, name_with_ext)
-
-        def create_tokenizer():
-            # Build tokenizer using tfds for both questions and answers
-            tokenizer = tfds.features.text.SubwordTextEncoder.build_from_corpus(self.questions + self.answers,
-                                                                                target_vocab_size=config.MAX_VOCAB_SIZE)
-            tokenizer.save_to_file(vocab_filename)
-            return tokenizer
-        if not os.path.exists(vocab_filepath):
+        '''Build tokenizer'''
+        if not os.path.exists(self.VOCAB_FILE):
             print('\nCreating new tokenizer...')
-            tokenizer = create_tokenizer()
+            tokenizer = tfds.features.text.SubwordTextEncoder.build_from_corpus(self.questions + self.answers,
+                                                                                target_vocab_size=self.args.vocab_size)
+            tokenizer.save_to_file(self.VOCAB_NO_EXT)
         else:
             print('\nTokenizer already initialized. Loading from file...')
-            tokenizer = tfds.features.text.SubwordTextEncoder.load_from_file(vocab_filename)
-        return tokenizer
+            tokenizer = tfds.features.text.SubwordTextEncoder.load_from_file(self.VOCAB_NO_EXT)
+        # Define start and end token to indicate the start and end of a sentence
+        START_TOKEN, END_TOKEN = [tokenizer.vocab_size], [tokenizer.vocab_size + 1]
+        return tokenizer, START_TOKEN, END_TOKEN
 
     # Tokenize, filter and pad sentences
     def tokenize_and_filter(self, inputs, outputs):
+        '''Tokenizer and filter inputs-outputs to fit the model hyperparams'''
         tokenized_inputs, tokenized_outputs = [], []
         for (sentence1, sentence2) in zip(inputs, outputs):
             # tokenize sentence
-            sentence1 = self.START_TOKEN + \
-                self.tokenizer.encode(sentence1) + self.END_TOKEN
-            sentence2 = self.START_TOKEN + \
-                self.tokenizer.encode(sentence2) + self.END_TOKEN
+            sentence1 = self.START_TOKEN + self.tokenizer.encode(sentence1) + self.END_TOKEN
+            sentence2 = self.START_TOKEN + self.tokenizer.encode(sentence2) + self.END_TOKEN
             # check tokenized sentence max length
-            if len(sentence1) <= config.MAX_LENGTH and len(sentence2) <= config.MAX_LENGTH:
+            if len(sentence1) <= self.args.max_length and len(sentence2) <= self.args.max_length:
                 tokenized_inputs.append(sentence1)
                 tokenized_outputs.append(sentence2)
-
         # pad tokenized sentences
-        tokenized_inputs = tf.keras.preprocessing.sequence.pad_sequences(
-            tokenized_inputs, maxlen=config.MAX_LENGTH, padding='post')
-        tokenized_outputs = tf.keras.preprocessing.sequence.pad_sequences(
-            tokenized_outputs, maxlen=config.MAX_LENGTH, padding='post')
-
+        tokenized_inputs = tf.keras.preprocessing.sequence.pad_sequences(tokenized_inputs, maxlen=self.args.max_length, padding='post')
+        tokenized_outputs = tf.keras.preprocessing.sequence.pad_sequences(tokenized_outputs, maxlen=self.args.max_length, padding='post')
         return tokenized_inputs, tokenized_outputs
 
     def create_dataset(self):
-        # Building Dataset using tf.data.Dataset
+        '''Building Dataset using tf.data.Dataset'''
         # decoder inputs use the previous target as input
         # remove START_TOKEN from targets
         dataset = tf.data.Dataset.from_tensor_slices((
@@ -121,5 +138,10 @@ class dataHandler:
             {
                 'outputs': self.t_answers[:, 1:]
             },
-        )).cache().shuffle(config.BUFFER_SIZE).batch(config.BATCH_SIZE).prefetch(tf.data.experimental.AUTOTUNE)
+        ))
+        dataset = dataset.cache()
+        dataset = dataset.shuffle(self.args.buffer_size)
+        dataset = dataset.batch(self.args.batch_size)
+        dataset = dataset.prefetch(tf.data.experimental.AUTOTUNE)
         return dataset
+        # TODO: save dataset to file, probably load dataset if continue training to reduce time?
