@@ -10,10 +10,10 @@ from __future__ import unicode_literals
 
 # import module
 import os
+import tensorflow as tf
 import logging  # Removing annoying tf warning
 import argparse  # Parsing arguments to commandline
 import configparser  # Writing config files
-import tensorflow as tf
 from packaging import version  # Testing versions
 import datetime  # Logging purposes
 
@@ -41,6 +41,7 @@ class CustomSchedule(tf.keras.optimizers.schedules.LearningRateSchedule):
         Returns:
             learning_rate <int>: Dynamic learning rate.
     '''
+
     def __init__(self, d_model, warmup_steps=4000):
         '''
         Args:
@@ -64,6 +65,7 @@ class CustomSchedule(tf.keras.optimizers.schedules.LearningRateSchedule):
         arg2 = step * (self.warmup_steps**-1.5)
 
         return tf.math.rsqrt(self.d_model) * tf.math.minimum(arg1, arg2)
+
 
 class botNet:
     '''
@@ -131,7 +133,7 @@ class botNet:
         dataset_args.add_argument('--max_length', type=int, default=40, help='Max length for a sentence')
         dataset_args.add_argument('--buffer_size', type=int, default=20000, help='Amount of data for one buffer')
         dataset_args.add_argument('--batch_size', type=int, default=64, help='Size of a mini-batch')
-        dataset_args.add_argument('--epochs', type=int, default=20, help='# of epochs for training')
+        dataset_args.add_argument('--epochs', type=int, default=50, help='# of epochs for training')
 
         # Model parameters
         model_args = parser.add_argument_group('Model options')
@@ -155,23 +157,26 @@ class botNet:
         # Data objects
         self.process = dataHandler(self.args)
         # Misc dir object
-        self.model_dir, self.log_dir = self._get_model_dir()
+        self.model_dir, self.log_dir = self._get_directory()
         self.checkpoint = self._get_checkpoint()
         self.checkpoint_dir = os.path.dirname(self.checkpoint)
 
         # TODO: Fixes tensorboard
         # Tensorflow objects for logging purposes
         self.tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=self.log_dir,
-                                                                   histogram_freq=1)
+                                                                   histogram_freq=1,
+                                                                   batch_size=self.args.batch_size,
+                                                                   write_graph=True,
+                                                                   write_grads=True,
+                                                                   write_images=True,)
         self.checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(self.checkpoint,
                                                                       verbose=1,
-                                                                      save_weights_only=True,
-                                                                      period=5)
+                                                                      save_weights_only=True,)
         # Either INTERACTIVE or TRAIN (default)
         if self.args.mode:
             if self.args.mode == botNet.Mode.INTERACTIVE:
                 self.main_interactive()
-            elif self.args.mode == botNet.Mode.DAEMON:
+            elif self.args.mode == botNet.Mode.DAEMON:  # for website interface (future)
                 print('\nDaemon mode, running in background...')
             else:
                 raise RuntimeError('Unknown mode: {}'.format(self.args.mode))  # never going to happen unless some typo in the code segment
@@ -184,7 +189,7 @@ class botNet:
         model_train = self.model()
         print('\nModel summary: ')
         model_train.summary()
-        # Train the model and save checkpoint
+        # Train the model and save checkpoint. Continue from saved checkpoint if --continue_training is chosen
         try:
             if self.args.continue_training:
                 self.load_model_params()
@@ -204,7 +209,7 @@ class botNet:
                 self.save_model_params()
                 print('\nFinished training.')
         except (KeyboardInterrupt, SystemExit):
-            print('\nInterruption detected, exiting the program...')
+            print('\n\nInterruption detected, exiting the program...')
         del model_train
 
     def main_interactive(self):
@@ -212,7 +217,7 @@ class botNet:
         model_test = self.model()
         model_test.load_weights(tf.train.latest_checkpoint(self.checkpoint_dir))
         # Writing outputs to file
-        print('\n Hey Vsauce. I might understand what you are about to talk to me.')
+        print('Hey. I might understand what you are about to talk to me.')
         with open(os.path.join(self.process.DATA_PATH, self.process.VOCAB_PATH, self.OUTPUT_FILE), 'w+') as output_file:
             try:
                 output_file.write('\n========================================================\n')
@@ -274,7 +279,7 @@ class botNet:
         prediction = evaluate(model_t, sentence)
         predicted_sentence = self.process.tokenizer.decode(
             [i for i in prediction if i < self.process.tokenizer.vocab_size])
-        # print('Output: {}'.format(predicted_sentence))
+        print('Output: {}'.format(predicted_sentence))
         return predicted_sentence
 
     def model(self):
@@ -307,24 +312,26 @@ class botNet:
                                     d_model=self.args.d_model,
                                     num_heads=self.args.heads,
                                     dropout=self.args.dropout)
+        # tf.summary.scalar('Accuracy', tf.convert_to_tensor(accuracy))
         created_model.compile(optimizer=optimizer,
                               loss=loss_function,
                               metrics=[accuracy])
         return created_model
 
-    def _get_model_dir(self):
+    def _get_directory(self):
         '''Get model and log directory'''
         self.model_dir = os.path.join(self.root_dir, self.MODEL_DIR_BASE)
         if self.args.model_tag:
             self.model_dir += '-' + self.args.model_tag
             self.log_dir = os.path.join(self.model_dir, self.LOG_DIRNAME)
-            self.log_dir += os.sep + datetime.datetime.now().strftime("%Y%m%d-%H%M%S") + os.sep
+            self.log_dir += os.sep + 'fit' + os.sep + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
         return self.model_dir, self.log_dir
 
     def _get_checkpoint(self):
         '''Get model checkpoint (save weights only)'''
         model_ckpt = os.path.join(self.model_dir, self.MODEL_NAME_BASE)
-        return model_ckpt + self.MODEL_EXT
+        if self.args.model_tag:
+            return model_ckpt + '-{}'.format(self.args.model_tag) + self.MODEL_EXT
 
     def save_model_params(self):
         '''
@@ -386,7 +393,7 @@ class botNet:
             # No restoring for training params, batch size or other non model dependent parameters
 
             # Show the restored params
-            print('Warning: Restoring parameters:...')
+            print('\nWarning: Restoring parameters:...')
             print('\nGlobal options:')
             print('Corpus: {}'.format(self.args.corpus))
             print('\nDataset options:')

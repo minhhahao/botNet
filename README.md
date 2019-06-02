@@ -47,7 +47,7 @@ Some useful tags for customization. For more options, run `python main.py -h`:
   * `--epochs <int>`: changing numbers of epochs for training.
   * `--num_layers <int>`: increasing # of layers for the network.
 
-To visualize the computational graph and the cost with [TensorBoard](https://www.tensorflow.org/how_tos/summaries_and_tensorboard/), just run `tensorboard --logdir chatbot/save/model-<--model_tag>/logs/`. (_Currently not working_)
+To visualize the computational graph and the cost with [TensorBoard](https://www.tensorflow.org/how_tos/summaries_and_tensorboard/), just run `tensorboard --logdir chatbot/save/model-<--model_tag>/logs/`.
 
 By default, the network architecture is a __stacked self-attention__ and __point-wise, fully connected layers__ for both encoder and decoder with the dimension size of 512 in 2 parallel layers. The network is trained using ADAM with custom learning rate. More about this can be found in [the paper](https://arxiv.org/pdf/1706.03762.pdf). This refers to [models.py](chatbot/model.py).
 
@@ -55,7 +55,7 @@ By default, the network architecture is a __stacked self-attention__ and __point
 
 After 105 mins of training on GTX 1060M, the bot can respond correspondingly relatively well. One improvement is the increase dataset.
 
-Here are some example response (_more can be found [here](data/samples/output.txt)_):
+Here are some example response :
 
     Input: hello there
     Output: this is dr . smith s answering service .
