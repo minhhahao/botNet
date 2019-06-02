@@ -13,13 +13,14 @@ import sys
 # https://github.com/AppliedDataSciencePartners/DeepReinforcementLearning/issues/3#issuecomment-420989055
 os.environ['PATH'] += os.pathsep + 'C:/Program Files (x86)/Graphviz2.38/bin/'
 
+# python main.py --verbose --model_tag drunkboiv2 --epochs 20 --num_layers 3 --max_samples 65000 --buffer_size 25000 --batch_size 128 --max_length 45 --vocab_size 16384
 
 def preprocess_sentence(sentence):
     '''
     Remove any special characters, lower all words in a given sentence for data processing
-    args:
+    Args:
         sentence <str>: input sentence
-    returns:
+    Returns:
         sentence <str>: purified sentence uwu
     '''
     sentence = sentence.lower().strip()

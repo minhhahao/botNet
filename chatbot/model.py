@@ -13,11 +13,11 @@ def scaled_dot_product_attention(query, key, value, mask):
     Compute dot products of query with all keys divide by sqrt(d_k):
         tf.matmul(query, key, transpose_b=True)/tf.math.sqrt(depth)
     then apply softmax(logits, axis=-1) to obtain the weight
-    args:
+    Args:
         query, key <int>: of dimension d_k
         value <int>: of dimension d_v
         mask <int>: mask for padding value
-    returns:
+    Returns:
         output <float32>: attention value
     '''
     matmul_qk = tf.matmul(query, key, transpose_b=True)
@@ -41,10 +41,10 @@ def scaled_dot_product_attention(query, key, value, mask):
 class MultiHeadAttention(tf.keras.layers.Layer):
     '''
         Performing scaled-dot product attention in parallel for faster computation and space-efficiency
-        args:
+        Args:
             d_model <int>: dimension of the model
             num_heads <int>: numbers of parallel layers
-        returns:
+        Returns:
             output <float32>: the probability of a word
     '''
 
@@ -120,9 +120,9 @@ class PositionalEncoding(tf.keras.layers.Layer):
         PE_(pos,2i)   = tf.math.sin(angle_rads[:, 0::2]) with angle_rads = self.get_angles(...)
         PE_(pos,2i+1) = tf.math.cos(angle_rads[:, 1::2])
     Added concat() for linearization
-    args:
+    Args:
         position <float32>: returns the position of the model
-    returns:
+    Returns:
         inputs or outputs with corresponding PE
     '''
     def __init__(self, position, d_model):

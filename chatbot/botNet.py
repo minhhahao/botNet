@@ -26,6 +26,7 @@ from chatbot.utils import _get_user_input, preprocess_sentence
 logging.getLogger('tensorflow').disabled = True
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
+
 class CustomSchedule(tf.keras.optimizers.schedules.LearningRateSchedule):
     '''
         Custom learning rate schedules
@@ -35,14 +36,14 @@ class CustomSchedule(tf.keras.optimizers.schedules.LearningRateSchedule):
             args1 = tf.math.rsqrt(step)
             args2 = step * (self.warmup_steps**-1.5)
         Refers to [this paper](https://arxiv.org/pdf/1706.03762.pdf)
-        args:
+        Args:
             d_model <int>: model dimensions
-        returns:
+        Returns:
             learning_rate <int>: Dynamic learning rate.
     '''
     def __init__(self, d_model, warmup_steps=4000):
         '''
-        args:
+        Args:
             d_model <int>: model dimensions
         '''
         super(CustomSchedule, self).__init__()
@@ -54,9 +55,9 @@ class CustomSchedule(tf.keras.optimizers.schedules.LearningRateSchedule):
 
     def __call__(self, step):
         '''
-        args:
+        Args:
             step <int>: The amount of steps taken for training
-        returns:
+        Returns:
             learning_rate <int>; Dunamic learning rate
         '''
         arg1 = tf.math.rsqrt(step)
@@ -104,7 +105,7 @@ class botNet:
     def parse_args(args):
         '''
         Parse the arguments from the given command line
-        args:
+        Args:
             args (list<str>): List of arguments to parse. If None, the default sys.argv will be parsed
         '''
         parser = argparse.ArgumentParser()
@@ -160,7 +161,8 @@ class botNet:
 
         # TODO: Fixes tensorboard
         # Tensorflow objects for logging purposes
-        self.tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=self.log_dir)
+        self.tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=self.log_dir,
+                                                                   histogram_freq=1)
         self.checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(self.checkpoint,
                                                                       verbose=1,
                                                                       save_weights_only=True,
@@ -170,7 +172,7 @@ class botNet:
             if self.args.mode == botNet.Mode.INTERACTIVE:
                 self.main_interactive()
             elif self.args.mode == botNet.Mode.DAEMON:
-                self.main_daemon()
+                print('\nDaemon mode, running in background...')
             else:
                 raise RuntimeError('Unknown mode: {}'.format(self.args.mode))  # never going to happen unless some typo in the code segment
         else:
@@ -199,45 +201,21 @@ class botNet:
                                 epochs=self.args.epochs,
                                 callbacks=[self.checkpoint_callback, self.tensorboard_callback])
                 model_train.save_weights(self.checkpoint)
-                print('\nFinished training.')
                 self.save_model_params()
+                print('\nFinished training.')
         except (KeyboardInterrupt, SystemExit):
-            print('Interruption detected, exiting the program...')
+            print('\nInterruption detected, exiting the program...')
         del model_train
 
     def main_interactive(self):
         '''Interacting loop'''
-        def predict(model_t, sentence):
-            def evaluate(model_t, sentence):
-                sentence = preprocess_sentence(sentence)
-                sentence = tf.expand_dims(self.process.START_TOKEN + self.process.tokenizer.encode(sentence) + self.process.END_TOKEN, axis=0)
-
-                output = tf.expand_dims(self.process.START_TOKEN, 0)
-
-                for i in range(self.args.max_length):
-                    predictions = model_t(inputs=[sentence, output], training=False)
-                    # select the last word from the seq_len dimension
-                    predictions = predictions[:, -1:, :]
-                    predicted_id = tf.cast(tf.argmax(predictions, axis=-1), tf.int32)
-                    # return the result if the predicted_id is equal to the end token
-                    if tf.equal(predicted_id, self.process.END_TOKEN[0]):
-                        break
-                    # concatenated the predicted_id to the output which is given
-                    # to the decoder as its input.
-                    output = tf.concat([output, predicted_id], axis=-1)
-                return tf.squeeze(output, axis=0)
-
-            prediction = evaluate(model_t, sentence)
-            predicted_sentence = self.process.tokenizer.decode(
-                [i for i in prediction if i < self.process.tokenizer.vocab_size])
-            print('Output: {}'.format(predicted_sentence))
-            return predicted_sentence
-
         model_test = self.model()
         model_test.load_weights(tf.train.latest_checkpoint(self.checkpoint_dir))
-        with open(os.path.join(self.process.DATA_PATH, self.process.VOCAB_PATH, self.OUTPUT_FILE), 'a+') as output_file:
+        # Writing outputs to file
+        print('\n Hey Vsauce. I might understand what you are about to talk to me.')
+        with open(os.path.join(self.process.DATA_PATH, self.process.VOCAB_PATH, self.OUTPUT_FILE), 'w+') as output_file:
             try:
-                output_file.write('\n=============================================\n')
+                output_file.write('\n========================================================\n')
                 output_file.write(datetime.datetime.now().strftime("%Y%m%d-%H%M%S"))
                 while True:
                     line = _get_user_input()
@@ -246,15 +224,58 @@ class botNet:
                     if line == '':
                         break
                     output_file.write('\nInput: {}\n'.format(line))
-                    output_file.write('Output: {}\n'.format(predict(model_test, line)))
-                output_file.write('\n=============================================\n')
+                    output_file.write('Output: {}\n'.format(self.predict(model_test, line)))
+                output_file.write('\n========================================================\n')
                 output_file.close()
             except KeyboardInterrupt:
                 print('\nTerminated')
         del model_test
 
-    def main_daemon(self):
-        pass
+    def daemon_predict(self, sentence):
+        '''
+        Return the answer to a given sentence in daemon mode
+        Args:
+            sentence <str>: the raw input sentence
+        return:
+            <str>: bot respond
+        '''
+        model_daemon = self.model()
+        model_daemon.load_weights(tf.train.latest_checkpoint(self.checkpoint_dir))
+        return self.predict(model_daemon, sentence)
+
+    def predict(self, model_t, sentence):
+        '''
+        Return a response based on given sentence
+        Args:
+            model_t <obj>: model with weights (using self.model() and load_weights(tf.train.latest_checkpoint(self.checkpoint_dir)))
+            sentence <str>: Input sentence from Users
+        Returns:
+            sentence <str>: Bot respond
+        '''
+        def evaluate(model_t, sentence):
+            sentence = preprocess_sentence(sentence)
+            sentence = tf.expand_dims(self.process.START_TOKEN + self.process.tokenizer.encode(sentence) + self.process.END_TOKEN, axis=0)
+
+            output = tf.expand_dims(self.process.START_TOKEN, 0)
+
+            for i in range(self.args.max_length):
+                predictions = model_t(inputs=[sentence, output], training=False)
+                # select the last word from the seq_len dimension
+                predictions = predictions[:, -1:, :]
+                predicted_id = tf.cast(tf.argmax(predictions, axis=-1), tf.int32)
+                # return the result if the predicted_id is equal to the end token
+                if tf.equal(predicted_id, self.process.END_TOKEN[0]):
+                    break
+                # concatenated the predicted_id to the output which is given
+                # to the decoder as its input.
+                output = tf.concat([output, predicted_id], axis=-1)
+            return tf.squeeze(output, axis=0)
+
+        prediction = evaluate(model_t, sentence)
+        predicted_sentence = self.process.tokenizer.decode(
+            [i for i in prediction if i < self.process.tokenizer.vocab_size])
+        # print('Output: {}'.format(predicted_sentence))
+        return predicted_sentence
 
     def model(self):
         '''Generates models'''
@@ -333,8 +354,7 @@ class botNet:
         config['Training (won\'t be restored)']['batch_size'] = str(self.args.batch_size)
         config['Training (won\'t be restored)']['dropout'] = str(self.args.dropout)
 
-        config = os.path.join(self.model_dir, self.CONFIG_FILENAME)
-        with open(config, 'w+') as config_file:
+        with open(os.path.join(self.model_dir, self.CONFIG_FILENAME), 'w') as config_file:
             config.write(config_file)
 
     def load_model_params(self):

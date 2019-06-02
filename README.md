@@ -49,48 +49,46 @@ Some useful tags for customization. For more options, run `python main.py -h`:
 
 To visualize the computational graph and the cost with [TensorBoard](https://www.tensorflow.org/how_tos/summaries_and_tensorboard/), just run `tensorboard --logdir chatbot/save/model-<--model_tag>/logs/`. (_Currently not working_)
 
-This refers to [models.py](chatbot/model.py).
-
-By default, the network architecture is a __stacked self-attention__ and __point-wise, fully connected layers__ for both encoder and decoder with the dimension size of 512 in 2 parallel layers. The network is trained using ADAM with custom learning rate. More about this can be found in [the paper](https://arxiv.org/pdf/1706.03762.pdf).
+By default, the network architecture is a __stacked self-attention__ and __point-wise, fully connected layers__ for both encoder and decoder with the dimension size of 512 in 2 parallel layers. The network is trained using ADAM with custom learning rate. More about this can be found in [the paper](https://arxiv.org/pdf/1706.03762.pdf). This refers to [models.py](chatbot/model.py).
 
 ## Results
 
-After 40 mins of training on GTX 1060M, the bot can respond correspondingly relatively well. One improvement is the increase dataset.
+After 105 mins of training on GTX 1060M, the bot can respond correspondingly relatively well. One improvement is the increase dataset.
 
 Here are some example response (_more can be found [here](data/samples/output.txt)_):
 
     Input: hello there
-    :sheep: this is dr . smith s answering service .
+    Output: this is dr . smith s answering service .
 
     Input: what is your name?
-    :sheep: nobody knows . there re my friend here .
+    Output: nobody knows . there re my friend here .
 
     Input: name
-    :sheep: yes sir .
+    Output: yes sir .
 
     Input: is
-    :sheep: what do you mean what ?
+    Output: what do you mean what ?
 
     Input: steve
-    :sheep: an likely , herr mozart .
+    Output: an likely , herr mozart .
 
     Input: wow
-    :sheep: let s go .
+    Output: let s go .
 
     Input: big comparison
-    :sheep: think they re alright ?
+    Output: think they re alright ?
 
     Input: they are
-    :sheep: i suppose not , david . i have to stop and think of my dreams , d better get going .
+    Output: i suppose not , david . i have to stop and think of my dreams , d better get going .
 
     Input: i think i might train you more
-    :sheep: is there two of us ? look at me !
+    Output: is there two of us ? look at me !
 
     Input: good bye
-    :sheep: oh , bill , i ll keep him all put this . i ll see side .
+    Output: oh , bill , i ll keep him all put this . i ll see side .
 
     Input: i will open the door
-    :sheep: what ?
+    Output: what ?
 
 ## Pretrained model
 
@@ -102,4 +100,3 @@ You can find _drunkboiv1_, a pretrained model [here](https://drive.google.com/fi
 
 ## Improvements
  * NEED MORE DATA !!! :bomb:
- * AWS for bigger models?

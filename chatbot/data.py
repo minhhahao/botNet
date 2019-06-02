@@ -21,7 +21,7 @@ from .utils import preprocess_sentence
 class dataHandler:
     '''
     Processing datafile
-    returns:
+    Returns:
         dataset <obj>: tokenized mini-batch
         questions, answers list(<str>): correspondingly list of inputs and outputs for encoder-decoder
         tokenizer <obj>: Tensorflow tokenizer
@@ -31,7 +31,7 @@ class dataHandler:
 
     def __init__(self, args):
         '''
-        args:
+        Args:
             args (list<str>): arguments for processing data
         '''
         self.args = args
