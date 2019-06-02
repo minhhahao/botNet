@@ -382,4 +382,4 @@ class botNet:
             print('Parallel layers: {}'.format(self.args.heads))
             print('Dense layers dimension: {}'.format(self.args.units))
         else:
-            print('\nNo config file found. Passing...')
+            print('\nNo config file found. Passing...\n')

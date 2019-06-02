@@ -92,5 +92,5 @@ class Draw:
     def draw_transformer(self):
         # Sample seq2seq model with transformer
         # https://arxiv.org/pdf/1706.03762.pdf
-        sample_transformer = self.transformer(self.vocab_size, num_layers=4, self.units, self.d_model, self.num_heads, self.dropout, name="sample_transformer")
+        sample_transformer = self.transformer(vocab_size=self.vocab_size, num_layers=4, units=self.units, d_model=self.d_model, num_heads=self.num_heads, drouput=self.dropout, name="sample_transformer")
         self.tf.keras.utils.plot_model(sample_transformer, to_file='data' + os.sep + 'images' + os.sep + 'transformer.png', show_shapes=True)

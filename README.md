@@ -38,6 +38,7 @@ Dependencies: `pip install -r requirements.txt`
 ### Chatbot
 
 To train the model, simply run `python main.py`. After training, run `python main.py --mode interactive` to interactive with the bot =)
+
 Some useful tags for customization. For more options, run `python main.py -h`:
   * `--model_tag <name>`: allow to manage different models if you want to tweak with parameters
   * `--verbose`: print outputs for debugging purposes
@@ -45,7 +46,7 @@ Some useful tags for customization. For more options, run `python main.py -h`:
   * `--epochs <int>`: changing numbers of epochs for training.
   * `--num_layers <int>`: increasing # of layers for the network.
 
-To visualize the computational graph and the cost with [TensorBoard](https://www.tensorflow.org/how_tos/summaries_and_tensorboard/), just run `tensorboard --logdir chatbot/save/model-<--model_tag>/logs/`. (_FIXING_)
+To visualize the computational graph and the cost with [TensorBoard](https://www.tensorflow.org/how_tos/summaries_and_tensorboard/), just run `tensorboard --logdir chatbot/save/model-<--model_tag>/logs/`. (_Currently not working_)
 
 This refers to [models.py](chatbot/model.py).
 
@@ -55,7 +56,7 @@ By default, the network architecture is a __stacked self-attention__ and __point
 
 After 40 mins of training on GTX 1060M, the bot can respond correspondingly relatively well. One improvement is the increase dataset.
 
-Here are some example response (more can be found [here](data/samples/output.txt)):
+Here are some example response (_more can be found [here](data/samples/output.txt)_):
 
     Input: hello there
     Output: this is dr . smith s answering service .
