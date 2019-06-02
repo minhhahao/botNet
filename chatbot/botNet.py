@@ -178,10 +178,6 @@ class botNet:
 
     def main_train(self):
         '''Training loop'''
-        if self.args.continue_training:
-            self.load_model_params()
-        else:
-            self.save_model_params()
         print('Creating models...')
         model_train = self.model()
         print('\nModel summary: ')
@@ -189,6 +185,7 @@ class botNet:
         # Train the model and save checkpoint
         try:
             if self.args.continue_training:
+                self.load_model_params()
                 print('\nStart from saved weights (press Ctrl+C to save and exit)...\n')
                 model_train.load_weights(tf.train.latest_checkpoint(self.checkpoint_dir))
                 model_train.fit(self.process.dataset,
@@ -203,6 +200,7 @@ class botNet:
                                 callbacks=[self.checkpoint_callback, self.tensorboard_callback])
                 model_train.save_weights(self.checkpoint)
                 print('\nFinished training.')
+                self.save_model_params()
         except (KeyboardInterrupt, SystemExit):
             print('Interruption detected, exiting the program...')
         del model_train
@@ -335,7 +333,8 @@ class botNet:
         config['Training (won\'t be restored)']['batch_size'] = str(self.args.batch_size)
         config['Training (won\'t be restored)']['dropout'] = str(self.args.dropout)
 
-        with open(os.path.join(self.model_dir, self.CONFIG_FILENAME), 'w') as config_file:
+        config = os.path.join(self.model_dir, self.CONFIG_FILENAME)
+        with open(config, 'w+') as config_file:
             config.write(config_file)
 
     def load_model_params(self):

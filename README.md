@@ -1,7 +1,7 @@
 # botNet
 :satisfied:
 
-### Table of Contents
+## Table of Contents
 * [About](#about)
 * [Installation](#installation)
 * [Todoist](#Todoist)
