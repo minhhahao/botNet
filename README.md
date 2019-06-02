@@ -1,4 +1,5 @@
 # botNet
+:satisfied:
 
 ### Table of Contents
 * [About](#about)
@@ -16,7 +17,7 @@ A chatbot based on _Transformer model with Attention_, proposed by [Google Brain
 
 - Dataset:  
   * [Cornell Movie Corpus](https://www.cs.cornell.edu/~cristian/Cornell_Movie-Dialogs_Corpus.html)
-    (the files can be found in [data directory](data/cornell))
+    (the files can be found in [data](data/cornell))
 
 ## Installation
 Dependencies: `pip install -r requirements.txt`
@@ -28,16 +29,16 @@ Dependencies: `pip install -r requirements.txt`
 -   [x] Finished processing database
 -   [x] Creating training model based on [tensorflow/nmt](https://github.com/tensorflow/nmt)
 -   [x] Arguments for better customization
--   [x] Config writer
--   [ ] Process more data from different sources (RC comments, Ubuntu corpus)
+-   [x] Automatically write configs for different models
+-   [x] Document file
 -   [ ] Fix TensorBoard
--   [ ] Document file
+-   [ ] Process more data from different sources (RC comments, Ubuntu corpus)
 
 ## Running
 
 ### Chatbot
 
-To train the model, simply run `python main.py`. After training, run `python main.py --mode interactive` to interactive with the bot =)
+To train the model, simply run `python main.py`. After training, run `python main.py --mode interactive` to interactive with the bot :smile: :monkey_face:
 
 Some useful tags for customization. For more options, run `python main.py -h`:
   * `--model_tag <name>`: allow to manage different models if you want to tweak with parameters
@@ -59,37 +60,37 @@ After 40 mins of training on GTX 1060M, the bot can respond correspondingly rela
 Here are some example response (_more can be found [here](data/samples/output.txt)_):
 
     Input: hello there
-    Output: this is dr . smith s answering service .
+    :sheep: this is dr . smith s answering service .
 
     Input: what is your name?
-    Output: nobody knows . there re my friend here .
+    :sheep: nobody knows . there re my friend here .
 
     Input: name
-    Output: yes sir .
+    :sheep: yes sir .
 
     Input: is
-    Output: what do you mean what ?
+    :sheep: what do you mean what ?
 
     Input: steve
-    Output: an likely , herr mozart .
+    :sheep: an likely , herr mozart .
 
     Input: wow
-    Output: let s go .
+    :sheep: let s go .
 
     Input: big comparison
-    Output: think they re alright ?
+    :sheep: think they re alright ?
 
     Input: they are
-    Output: i suppose not , david . i have to stop and think of my dreams , d better get going .
+    :sheep: i suppose not , david . i have to stop and think of my dreams , d better get going .
 
     Input: i think i might train you more
-    Output: is there two of us ? look at me !
+    :sheep: is there two of us ? look at me !
 
     Input: good bye
-    Output: oh , bill , i ll keep him all put this . i ll see side .
+    :sheep: oh , bill , i ll keep him all put this . i ll see side .
 
     Input: i will open the door
-    Output: what ?
+    :sheep: what ?
 
 ## Pretrained model
 
@@ -100,5 +101,5 @@ You can find _drunkboiv1_, a pretrained model [here](https://drive.google.com/fi
   4. Run `python main.py --mode interactive`
 
 ## Improvements
- * More data I guess
- * Probably have to bring it to AWS for bigger params training
+ * NEED MORE DATA !!! :bomb:
+ * AWS for bigger models?
