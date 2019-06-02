@@ -65,7 +65,7 @@ class dataHandler:
 
     def _construct_vocab_path(self):
         '''Construct path for vocab file without extension (tfds compatibility)'''
-        path = os.path.join(self.DATA_PATH, self.VOCAB_PATH) + os.sep + 'vocab-{}-size{}'.format(self.args.corpus, self.args.vocab_size)
+        path = os.path.join(self.DATA_PATH, self.VOCAB_PATH) + os.sep + 'vocab-{}-size{}-samples{}'.format(self.args.corpus, self.args.vocab_size, self.args.max_samples)
         return path
 
     def process_cornell(self):

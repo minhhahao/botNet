@@ -1,8 +1,0 @@
-
-========================================================
-20190601-234954
-Input: hello there 
-Output: cotcotcotcotcotcotcotcotcotcotcotcotcotcotcotcotcotcotcotcotcotcotcotcotcotcotcotcotcotcotcotcotcotcotcotcotcotcotcotcot
-
-Input: test
-Output: cotcotcotcotcotcotcotcotcotcotcotcotcotcotcotcotcotcotcotcotcotcotcotcotcotcotcotcotcotcotcotcotcotcotcotcotcotcotcotcot
