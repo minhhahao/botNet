@@ -67,7 +67,7 @@ I have created `server.bat` for Windows and `server.sh` for Linux. Such file can
 
   Once trained, there is an option for a more user friendly interface. The server will look at pretrained model `server` from the pretrained file (_you can train a model with --model_tag server_). For first time setup:
 
-  - create a `misc.py` and put your own `BOT_SECRET_KEY=`
+  - create a `misc.py` and put your own `BOT_SECRET_KEY='<your key here>'`
 
   ```bash
   cd botsite/

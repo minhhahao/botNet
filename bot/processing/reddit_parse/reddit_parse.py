@@ -1,3 +1,27 @@
+# Copyright 2019 Aaron Pham. All right reserved
+
+#   Licensed under the Apache License, Version 2.0 (the "License");
+#   you may not use this file except in compliance with the License.
+#   You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+#   Unless required by applicable law or agreed to in writing, software
+#   distributed under the License is distributed on an "AS IS" BASIS,
+#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#   See the License for the specific language governing permissions and
+#   limitations under the License.
+#   ==========================================================================
+'''
+    Descriptions: Parsing large json file from Reddit Comment
+'''
+# import future
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+from __future__ import unicode_literals
+
+# import module
 import bz2
 import argparse
 import os
@@ -5,6 +29,7 @@ import json
 import re
 import sys
 
+# General __init__
 FILE_SUFFIX = ".bz2"
 OUTPUT_FILE = "output.bz2"
 REPORT_FILE = "RC_report.txt"
@@ -75,7 +100,7 @@ def main():
                         help='data file or directory containing bz2 archive of json reddit data')
     parser.add_argument('--log_dir', type=str, default='output/',
                         help='directory to save the output and report')
-    parser.add_argument('--config_file', type=str, default='parser_config_standard.json',
+    parser.add_argument('--config_file', type=str, default='parser_config.json',
                         help='json parameters for parsing')
     parser.add_argument('--comment_cache_size', type=int, default=1e7,
                         help='max number of comments to cache in memory before flushing')
@@ -123,7 +148,8 @@ def parse_main(args):
 
         while not done:
             done, i = read_comments_into_cache(raw_data, comment_dict, args.print_every, args.print_subreddit,
-                                               args.comment_cache_size, subreddit_dict, subreddit_blacklist, subreddit_whitelist, substring_blacklist)
+                                               args.comment_cache_size, subreddit_dict, subreddit_blacklist,
+                                               subreddit_whitelist, substring_blacklist)
             total_read += i
             process_comment_cache(comment_dict, args.print_every)
             write_comment_cache(comment_dict, output_handler, args.print_every,
@@ -268,7 +294,7 @@ def write_comment_cache(comment_dict, output_file, print_every,
                 else:
                     comment = None
                     if depth >= min_conversation_length:
-                        output_file.write(output_string + '\n')
+                        output_file.write(str(output_string.encode('utf-8') + '\n'.encode('ascii')))
                         i += depth
                         if i > prev_print_count + print_every:
                             prev_print_count = i
@@ -278,7 +304,7 @@ def write_comment_cache(comment_dict, output_file, print_every,
 
 
 def write_report(report_file_path, subreddit_dict):
-    print("Updating subreddit report file")
+    print("Updating subreddit report file...")
     subreddit_list = sorted(subreddit_dict.items(), key=lambda x: -x[1])
     with open(report_file_path, "w") as f:
         for item in subreddit_list:
