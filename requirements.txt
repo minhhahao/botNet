@@ -4,8 +4,15 @@ tb-nightly
 tensorflow_datasets
 packaging
 
-# Website deployment
+# localhost deployment
 channels==1.1.8
 django==1.11.21
 asgiref==1.1.2
 asgi-redis==1.4.3
+
+# Heroku deployment
+dj-database-url==0.4.2
+gunicorn==19.7.1
+psycopg2==2.7.3.2
+pytz==2017.3
+whitenoise==3.3.1

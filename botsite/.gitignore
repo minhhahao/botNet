@@ -1,3 +1,4 @@
 # Ignore local database and redis dump
 *.sqlite3
 dump.rdb
+logs/*.log
