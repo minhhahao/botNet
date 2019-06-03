@@ -223,7 +223,7 @@ class botNet:
         print('\nHey. I might understand what you are about to talk to me.')
         with open(os.path.join(self.process.DATA_PATH, self.process.SAMPLES_PATH, self.OUTPUT_FILE), 'w+') as output_file:
             try:
-                output_file.write('-'*50 + '\n')
+                output_file.write('-'*100 + '\n')
                 output_file.write(datetime.datetime.now().strftime("%Y%m%d-%H%M%S"))
                 while True:
                     line = _get_user_input()
