@@ -322,7 +322,7 @@ class botNet:
 
     def _get_directory(self):
         '''Get model and log directory'''
-        self.model_dir = os.path.join(self.args.root_dir, self.MODEL_DIR_BASE)
+        self.model_dir = os.path.join(ROOT_DIR, self.MODEL_DIR_BASE)
         if self.args.model_tag:
             self.model_dir += '-' + self.args.model_tag
             self.log_dir = os.path.join(self.model_dir, self.LOG_DIRNAME)
