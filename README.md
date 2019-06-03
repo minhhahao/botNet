@@ -1,10 +1,10 @@
 # botNet
-:satisfied:
+[![License](https://img.shields.io/badge/License-Apache%202.0-brightgreen.svg)](https://opensource.org/licenses/Apache-2.0)
 
 ## Disclaimer:
-The information provided by the bot on the repository is for general study purposes only. All responses from the bot should not taken seriously. Under no circumstance shall I have any liability to you for any action as a result of the interaction with the bot. You can use the bot solely with your responsibility.
+The information provided by the bot on the repository is for general study purposes only. All responses from the bot should not taken seriously. Under no circumstance shall I have any liability to you for any action as a result of the interaction with the bot. Thus, it is solely your responsibility for your own action.
 
-## Table of Contents
+## Table of Contents :satisfied:
 * [About](#about)
 * [Installation](#installation)
 * [Todoist](#Todoist)
