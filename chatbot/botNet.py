@@ -218,7 +218,7 @@ class botNet:
         model_test.load_weights(tf.train.latest_checkpoint(self.checkpoint_dir))
         # Writing outputs to file
         print('Hey. I might understand what you are about to talk to me.')
-        with open(os.path.join(self.process.DATA_PATH, self.process.VOCAB_PATH, self.OUTPUT_FILE), 'w+') as output_file:
+        with open(os.path.join(self.process.DATA_PATH, self.process.SAMPLES_PATH, self.OUTPUT_FILE), 'w+') as output_file:
             try:
                 output_file.write('\n========================================================\n')
                 output_file.write(datetime.datetime.now().strftime("%Y%m%d-%H%M%S"))

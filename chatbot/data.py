@@ -37,11 +37,12 @@ class dataHandler:
         self.args = args
         # Init path
         self.DATA_PATH = 'data'
-        self.VOCAB_PATH = 'samples'
+        self.SAMPLES_PATH = 'samples'
 
         # Filename
-        self.VOCAB_NO_EXT = self._construct_vocab_path()
-        self.VOCAB_FILE = '{}.subwords'.format(self.VOCAB_NO_EXT)
+        self.TOKEN_NO_EXT = self._construct_token_path()
+        self.TOKEN_FILE = '{}.subwords'.format(self.TOKEN_NO_EXT)
+        # self.DATASET_FILE = 'dataset-{}.tfrecord'.format(self.args.corpus)
         # random int for debugging
         self.int = random.randint(0, 10000)
         self.process_data()
@@ -63,9 +64,9 @@ class dataHandler:
             print('\nNumber of samples: {}'.format(len(self.t_questions)))
             print('\nCreated dataset.\n')
 
-    def _construct_vocab_path(self):
-        '''Construct path for vocab file without extension (tfds compatibility)'''
-        path = os.path.join(self.DATA_PATH, self.VOCAB_PATH) + os.sep + 'vocab-{}-size{}-samples{}'.format(self.args.corpus, self.args.vocab_size, self.args.max_samples)
+    def _construct_token_path(self):
+        '''Construct path for token file without extension (tfds compatibility)'''
+        path = os.path.join(self.DATA_PATH, self.SAMPLES_PATH) + os.sep + 'tokenizer-{}-size{}-samples{}'.format(self.args.corpus, self.args.vocab_size, self.args.max_samples)
         return path
 
     def process_cornell(self):
@@ -97,14 +98,14 @@ class dataHandler:
 
     def load_tokenizer(self):
         '''Build tokenizer'''
-        if not os.path.exists(self.VOCAB_FILE):
+        if not os.path.exists(self.TOKEN_FILE):
             print('\nCreating new tokenizer...')
             tokenizer = tfds.features.text.SubwordTextEncoder.build_from_corpus(self.questions + self.answers,
                                                                                 target_vocab_size=self.args.vocab_size)
-            tokenizer.save_to_file(self.VOCAB_NO_EXT)
+            tokenizer.save_to_file(self.TOKEN_NO_EXT)
         else:
             print('\nTokenizer already initialized. Loading from file...')
-            tokenizer = tfds.features.text.SubwordTextEncoder.load_from_file(self.VOCAB_NO_EXT)
+            tokenizer = tfds.features.text.SubwordTextEncoder.load_from_file(self.TOKEN_NO_EXT)
         # Define start and end token to indicate the start and end of a sentence
         START_TOKEN, END_TOKEN = [tokenizer.vocab_size], [tokenizer.vocab_size + 1]
         return tokenizer, START_TOKEN, END_TOKEN
