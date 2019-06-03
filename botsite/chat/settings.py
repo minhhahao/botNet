@@ -11,6 +11,10 @@ https://docs.djangoproject.com/en/1.10/ref/settings/
 """
 
 import os
+import sys
+sys.path.append("..")
+
+from misc import BOT_SECRET_KEY
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -20,12 +24,12 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See  https://docs.djangoproject.com/en/1.10/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = '-w#wv1x*hx(&hlr4(_x6p%fg%^xe(gn8)b&%-w%6)3(!)^h+5-'
+SECRET_KEY = BOT_SECRET_KEY
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
