@@ -7,6 +7,7 @@
 * [Todoist](#Todoist)
 * [Running](#running)
   * [Chatbot](#chatbot)
+  * [Interface](#interface)
 * [Results](#results)
 * [Pretrained model](#pretrained-model)
 * [Improvements](#improvements)
@@ -24,6 +25,8 @@ Dependencies: `pip install -r requirements.txt`
   - python3 (tested with v3.6)
   - Tensorflow 2.0 (devbuild-20190529)
   - CUDA (find out more [here](https://docs.nvidia.com/cuda/cuda-installation-guide-microsoft-windows/index.html))
+  - django (built with 1.11)
+  - Redis (more [here](https://redis.io/topics/quickstart))
 
 ## Todoist
 -   [x] Finished processing database
@@ -31,7 +34,9 @@ Dependencies: `pip install -r requirements.txt`
 -   [x] Arguments for better customization
 -   [x] Automatically write configs for different models
 -   [x] Document file
--   [ ] Fix TensorBoard
+-   [x] Fix TensorBoard
+-   [x] Website for deployment
+-   [ ] npm build
 -   [ ] Process more data from different sources (RC comments, Ubuntu corpus)
 
 ## Running
@@ -50,6 +55,29 @@ Some useful tags for customization. For more options, run `python main.py -h`:
 To visualize the computational graph and the cost with [TensorBoard](https://www.tensorflow.org/how_tos/summaries_and_tensorboard/), just run `tensorboard --logdir chatbot/save/model-<--model_tag>/logs/`.
 
 By default, the network architecture is a __stacked self-attention__ and __point-wise, fully connected layers__ for both encoder and decoder with the dimension size of 512 in 2 parallel layers. The network is trained using ADAM with custom learning rate. More about this can be found in [the paper](https://arxiv.org/pdf/1706.03762.pdf). This refers to [models.py](chatbot/model.py).
+
+
+### Interface
+
+Once trained, there is an option for a more user friendly interface. The server will look at pretrained model `server` from the pretrained file (_you can train a model with --model_tag server_). For first time setup:
+
+- create a `misc.py` and put your own `BOT_SECRET_KEY=`
+
+```bash
+cd botsite/
+python manage.py makemigrations
+python manage.py migrate
+```
+
+Then launch the server locally with:
+
+```bash
+cd botsite/
+redis-server & python manage.py runserver
+```
+
+After launch, visit [localhost](http://localhost:8000/). More information can be found [here](https://docs.djangoproject.com/en/1.10/howto/deployment/checklist/).
+
 
 ## Results
 
@@ -92,10 +120,10 @@ Here are some example response :
 
 ## Pretrained model
 
-You can find _drunkboiv1_, a pretrained model [here](https://drive.google.com/file/d/1lA7EY-pIUx4_du3DA-R4ByfoqFeTBRHr/view?usp=sharing). To use it:
+You can find _drunkboiv2-with-server_ pretrained [here](https://drive.google.com/file/d/1vgOqA1Z-BAnaGh1NB9Gkt2envhai2U75/view?usp=sharing). To use it:
   1. Extract the zip inside the repository
-  2. Copy the preprocessed dataset from `model-pretrainedv2/data/samples` to `data/samples/`.
-  3. Copy pretrained weight from `model-pretrainedv2/save/` to `chatbot/save/`
+  2. Copy the preprocessed dataset from `model-pretrainedv2/data/` to `data/`.
+  3. Copy pretrained weight from `model-pretrainedv2/save/` to `save/`
   4. Run `python main.py --mode interactive`
 
 ## Improvements

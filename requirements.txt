@@ -3,3 +3,9 @@ tf-nightly-gpu-2.0-preview
 tb-nightly
 tensorflow_datasets
 packaging
+
+# Website deployment
+channels==1.1.8
+django==1.11
+asgiref==1.1.2
+asgi-redis==1.4.3
