@@ -63,24 +63,26 @@ By default, the network architecture is a __stacked self-attention__ and __point
 
 ### Interface
 
-Once trained, there is an option for a more user friendly interface. The server will look at pretrained model `server` from the pretrained file (_you can train a model with --model_tag server_). For first time setup:
+I have created `server.bat` for Windows and `server.sh` for Linux. Such file can be used to run the server easily. The following part explains in detail how to manually startup the server.
 
-- create a `misc.py` and put your own `BOT_SECRET_KEY=`
+  Once trained, there is an option for a more user friendly interface. The server will look at pretrained model `server` from the pretrained file (_you can train a model with --model_tag server_). For first time setup:
 
-```bash
-cd botsite/
-python manage.py makemigrations
-python manage.py migrate
-```
+  - create a `misc.py` and put your own `BOT_SECRET_KEY=`
 
-Then launch the server locally with:
+  ```bash
+  cd botsite/
+  python manage.py makemigrations
+  python manage.py migrate
+  ```
 
-```bash
-cd botsite/
-redis-server & python manage.py runserver
-```
+  Then launch the server locally with:
 
-After launch, visit [localhost](http://localhost:8000/). More information can be found [here](https://docs.djangoproject.com/en/1.10/howto/deployment/checklist/).
+  ```bash
+  cd botsite/
+  redis-server & python manage.py runserver
+  ```
+
+  After launch, visit [localhost](http://localhost:8000/). More information can be found [here](https://docs.djangoproject.com/en/1.10/howto/deployment/checklist/).
 
 
 ## Results
