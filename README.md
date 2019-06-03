@@ -1,6 +1,9 @@
 # botNet
 :satisfied:
 
+## Disclaimer:
+The information provided by the bot on the repository is for general study purposes only. All responses from the bot should not taken seriously. Under no circumstance shall I have any liability to you for any action as a result of the interaction with the bot. You can use the bot solely with your responsibility.
+
 ## Table of Contents
 * [About](#about)
 * [Installation](#installation)
