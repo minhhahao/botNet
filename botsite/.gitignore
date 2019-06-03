@@ -1,4 +1,3 @@
-# Database
+# Ignore local database and redis dump
 *.sqlite3
-# Redis
 dump.rdb
