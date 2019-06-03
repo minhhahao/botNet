@@ -31,7 +31,7 @@ import tensorflow_datasets as tfds  # Dataset processing because I'm kinda lazy
 import tensorflow as tf
 
 # import module from file
-from .utils import preprocess_sentence
+from bot.utils import preprocess_sentence
 from misc import ROOT_DIR
 
 class dataHandler:

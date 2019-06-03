@@ -32,7 +32,7 @@ from packaging import version  # Testing versions
 import datetime  # Logging purposes
 
 # import modules from files
-from bot.data import dataHandler
+from bot.processing.data import dataHandler
 from bot.model import transformer
 from bot.utils import _get_user_input, preprocess_sentence
 from misc import ROOT_DIR
