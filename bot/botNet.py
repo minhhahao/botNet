@@ -18,9 +18,9 @@ from packaging import version  # Testing versions
 import datetime  # Logging purposes
 
 # import modules from files
-from chatbot.data import dataHandler
-from chatbot.model import transformer
-from chatbot.utils import _get_user_input, preprocess_sentence
+from bot.data import dataHandler
+from bot.model import transformer
+from bot.utils import _get_user_input, preprocess_sentence
 
 # clean terminal view
 logging.getLogger('tensorflow').disabled = True
@@ -94,7 +94,6 @@ class botNet:
         # Constant dir, filename
         self.model_dir = ''
         self.log_dir = ''
-        self.root_dir = os.path.dirname(os.path.abspath(__file__))
         self.LOG_DIRNAME = 'logs'
         self.MODEL_DIR_BASE = 'save' + os.sep + 'model'
         self.MODEL_NAME_BASE = 'model'
@@ -124,6 +123,7 @@ class botNet:
         global_args.add_argument('--verbose', action='store_true', help='When training, print out all outputs')
         global_args.add_argument('--model_tag', type=str, default=None, help='tag to differentiate which model to store/load')
         global_args.add_argument('--continue_training', action='store_true', help='Continue training from saved weight')
+        global_args.add_argument('--root_dir', type=str, default=None, help='folder where to look for the models and data')
 
         # Dataset options
         dataset_args = parser.add_argument_group('Dataset options')
@@ -154,6 +154,8 @@ class botNet:
         assert version.parse(tf.__version__).release[0] >= 2, "Requirements: TensorFlow 2.0 or above."
         # Parsing args
         self.args = self.parse_args(args)
+        if not self.args.root_dir:
+            self.args.root_dir = os.getcwd()
         # Data objects
         self.process = dataHandler(self.args)
         # Misc dir object
@@ -217,10 +219,10 @@ class botNet:
         model_test = self.model()
         model_test.load_weights(tf.train.latest_checkpoint(self.checkpoint_dir))
         # Writing outputs to file
-        print('Hey. I might understand what you are about to talk to me.')
+        print('\nHey. I might understand what you are about to talk to me.')
         with open(os.path.join(self.process.DATA_PATH, self.process.SAMPLES_PATH, self.OUTPUT_FILE), 'w+') as output_file:
             try:
-                output_file.write('\n========================================================\n')
+                output_file.write('-'*50 + '\n')
                 output_file.write(datetime.datetime.now().strftime("%Y%m%d-%H%M%S"))
                 while True:
                     line = _get_user_input()
@@ -230,7 +232,6 @@ class botNet:
                         break
                     output_file.write('\nInput: {}\n'.format(line))
                     output_file.write('Output: {}\n'.format(self.predict(model_test, line)))
-                output_file.write('\n========================================================\n')
                 output_file.close()
             except KeyboardInterrupt:
                 print('\nTerminated')
@@ -320,7 +321,7 @@ class botNet:
 
     def _get_directory(self):
         '''Get model and log directory'''
-        self.model_dir = os.path.join(self.root_dir, self.MODEL_DIR_BASE)
+        self.model_dir = os.path.join(self.args.root_dir, self.MODEL_DIR_BASE)
         if self.args.model_tag:
             self.model_dir += '-' + self.args.model_tag
             self.log_dir = os.path.join(self.model_dir, self.LOG_DIRNAME)

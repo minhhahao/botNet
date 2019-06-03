@@ -1,4 +1,4 @@
-from chatbot import botNet
+from bot import botNet
 
 if __name__ == '__main__':
     bot = botNet.botNet()
