@@ -51,7 +51,8 @@ def ws_receive(message):
     question = data['message']
     try:
         answer = botManager.call_bot(question)
-    except:  # Catching all possible mistakes
+        # Catching all possible mistakes
+    except:
         logger.error('{}: Error with this question {}'.format(client_name, question))
         logger.error("Unexpected error:", sys.exc_info()[0])
         answer = 'Error: Internal problem'
@@ -64,6 +65,7 @@ def ws_receive(message):
 
     # Send the prediction back
     Group(client_name).send({'text': json.dumps({'message': answer})})
+
 
 @channel_session
 def ws_disconnect(message):
