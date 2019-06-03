@@ -21,6 +21,7 @@ import datetime  # Logging purposes
 from bot.data import dataHandler
 from bot.model import transformer
 from bot.utils import _get_user_input, preprocess_sentence
+from misc import ROOT_DIR
 
 # clean terminal view
 logging.getLogger('tensorflow').disabled = True
@@ -119,7 +120,7 @@ class botNet:
                                  const=botNet.Mode.TRAIN, default=None,
                                  help='Train mode [Default]. Compile model following given parameters. \
                                        Interative mode to talk to the bot. \
-                                       Daemon mode for running in background (Web app with Django)(Future development)')
+                                       Daemon mode for running in background (Web app with Django)')
         global_args.add_argument('--verbose', action='store_true', help='When training, print out all outputs')
         global_args.add_argument('--model_tag', type=str, default=None, help='tag to differentiate which model to store/load')
         global_args.add_argument('--continue_training', action='store_true', help='Continue training from saved weight')
@@ -179,7 +180,7 @@ class botNet:
             if self.args.mode == botNet.Mode.INTERACTIVE:
                 self.main_interactive()
             elif self.args.mode == botNet.Mode.DAEMON:  # for website interface (future)
-                print('\nDaemon mode, running in background...')
+                print('\nDaemon mode, running in background...\n')
             else:
                 raise RuntimeError('Unknown mode: {}'.format(self.args.mode))  # never going to happen unless some typo in the code segment
         else:
@@ -330,7 +331,7 @@ class botNet:
 
     def _get_checkpoint(self):
         '''Get model checkpoint (save weights only)'''
-        model_ckpt = os.path.join(self.model_dir, self.MODEL_NAME_BASE)
+        model_ckpt = os.path.join(ROOT_DIR, self.model_dir, self.MODEL_NAME_BASE)
         if self.args.model_tag:
             return model_ckpt + '-{}'.format(self.args.model_tag) + self.MODEL_EXT
 

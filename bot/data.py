@@ -17,6 +17,7 @@ import tensorflow as tf
 
 # import module from file
 from .utils import preprocess_sentence
+from misc import ROOT_DIR
 
 class dataHandler:
     '''
@@ -66,14 +67,14 @@ class dataHandler:
 
     def _construct_token_path(self):
         '''Construct path for token file without extension (tfds compatibility)'''
-        path = os.path.join(self.DATA_PATH, self.SAMPLES_PATH) + os.sep + 'tokenizer-{}-size{}-samples{}'.format(self.args.corpus, self.args.vocab_size, self.args.max_samples)
+        path = os.path.join(ROOT_DIR, self.DATA_PATH, self.SAMPLES_PATH) + os.sep + 'tokenizer-{}-size{}-samples{}'.format(self.args.corpus, self.args.vocab_size, self.args.max_samples)
         return path
 
     def process_cornell(self):
         '''Process data from Cornell corpus'''
         # dictionary of line id to text
-        movie_lines = os.path.join(self.DATA_PATH, 'cornell', 'movie_lines.txt')
-        movie_conversations = os.path.join(self.DATA_PATH, 'cornell', 'movie_conversations.txt')
+        movie_lines = os.path.join(ROOT_DIR, self.DATA_PATH, 'cornell', 'movie_lines.txt')
+        movie_conversations = os.path.join(ROOT_DIR, self.DATA_PATH, 'cornell', 'movie_conversations.txt')
 
         # Put lines into dict with {key:line, value:lineID}
         id2line = {}

@@ -3,7 +3,9 @@ from django.apps import AppConfig
 import logging
 import sys
 import os
-from ..bot import botNet
+sys.path.append("..")
+
+from bot import botNet
 
 chatbotPath = "/".join(settings.BASE_DIR.split('/')[:-1])
 sys.path.append(chatbotPath)
@@ -38,7 +40,7 @@ class botManager(AppConfig):
         if not botManager.bot:
             logger.info('Initializing bot...')
             botManager.bot = botNet.botNet()
-            botManager.bot.main(['--model_tag', 'drunkboiv1', '--mode', 'daemon', '--root_dir', chatbotPath])
+            botManager.bot.main(['--model_tag', 'server', '--mode', 'daemon', '--verbose'])
         else:
             logger.info('Bot already initialized.')
 
