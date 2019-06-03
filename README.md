@@ -14,6 +14,7 @@ The information provided by the bot on the repository is for general study purpo
 * [Results](#results)
 * [Pretrained model](#pretrained-model)
 * [Improvements](#improvements)
+* [Reference](#reference)
 
 ## About
 
@@ -22,6 +23,7 @@ A chatbot based on _Transformer model with Attention_, proposed by [Google Brain
 - Dataset:  
   * [Cornell Movie Corpus](https://www.cs.cornell.edu/~cristian/Cornell_Movie-Dialogs_Corpus.html)
     (the files can be found in [data](data/cornell))
+  * [Reddit Comments](http://files.pushshift.io/reddit/comments/) (_UNDER WORKING_)
 
 ## Installation
 Dependencies: `pip install -r requirements.txt`
@@ -32,15 +34,14 @@ Dependencies: `pip install -r requirements.txt`
   - Redis (more [here](https://redis.io/topics/quickstart))
 
 ## Todoist
--   [x] Finished processing database
--   [x] Creating training model based on [tensorflow/nmt](https://github.com/tensorflow/nmt)
--   [x] Arguments for better customization
--   [x] Automatically write configs for different models
--   [x] Document file
--   [x] Fix TensorBoard
+-   [ ] Reddit data processing
 -   [x] Website for deployment
--   [ ] npm build
--   [ ] Process more data from different sources (RC comments, Ubuntu corpus)
+-   [x] Fix TensorBoard
+-   [x] Document file
+-   [x] Automatically write configs for different models
+-   [x] Arguments for better customization
+-   [x] Creating training model based on [tensorflow/nmt](https://github.com/tensorflow/nmt)
+-   [x] Processing Cornell Corpus
 
 ## Running
 
@@ -123,11 +124,16 @@ Here are some example response :
 
 ## Pretrained model
 
-You can find _drunkboiv2-with-server_ pretrained [here](https://drive.google.com/file/d/1vgOqA1Z-BAnaGh1NB9Gkt2envhai2U75/view?usp=sharing). To use it:
+You can find _pretrainedmodel-v2-with-server_ [here](https://drive.google.com/file/d/1vgOqA1Z-BAnaGh1NB9Gkt2envhai2U75/view?usp=sharing). To use it:
   1. Extract the zip inside the repository
-  2. Copy the preprocessed dataset from `model-pretrainedv2/data/` to `data/`.
-  3. Copy pretrained weight from `model-pretrainedv2/save/` to `save/`
+  2. Copy the preprocessed dataset from `pretrainedmodel-v2-with-server/data/` to `data/`.
+  3. Copy pretrained weight from `pretrainedmodel-v2-with-server/save/` to `save/`
   4. Run `python main.py --mode interactive`
 
-## Improvements
- * NEED MORE DATA !!! :bomb:
+## Improvements :bomb:
+ * Data: More data should improve the capability of the bot. Such data can be increased from the [Reddit Comment](http://files.pushshift.io/reddit/comments/)
+ * Increase training parameters: Increase `--num_layers`, `--d_model` for more complex architecture. However, alongside with increasing parameters, I might need better hardware.
+
+## Reference
+  * A big thanks toward [Etienne Pot](http://e-pot.xyz/) for his amazing work on [DeepQA](https://github.com/Conchylicultor/DeepQA) that inspire me to finish this project.
+  * [Attention is All You Need](https://arxiv.org/abs/1706.03762) by _Google Brain Team_
