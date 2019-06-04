@@ -14,7 +14,7 @@ import os
 import sys
 sys.path.append("..")
 
-from misc import BOT_SECRET_KEY
+from misc import BOT_SECRET_KEY, PASSWORD
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -83,8 +83,12 @@ ASGI_APPLICATION = 'chat.routing.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'botsite',
+        'USER': 'aar0npham',
+        'PASSWORD': PASSWORD,
+        'HOST': '',
+        'PORT': '',
     }
 }
 

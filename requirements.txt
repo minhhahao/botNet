@@ -11,6 +11,7 @@ asgiref==1.1.2
 asgi-redis==1.4.3
 
 # Heroku deployment
+django-heroku
 dj-database-url==0.4.2
 gunicorn==19.7.1
 psycopg2==2.7.3.2
