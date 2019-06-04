@@ -14,7 +14,7 @@ import os
 import sys
 sys.path.append("..")
 
-from misc import BOT_SECRET_KEY, PASSWORD
+from xyz import BOT_SECRET_KEY
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))

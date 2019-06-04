@@ -32,10 +32,11 @@ from packaging import version  # Testing versions
 import datetime  # Logging purposes
 
 # import modules from files
-from bot.processing.cornelldata import dataHandler
+from bot.processing.cornell.cornell_data import cornellHandler
+from bot.processing.reddit.reddit_data import redditHandler
 from bot.model import transformer
 from bot.utils import _get_user_input, preprocess_sentence
-from misc import ROOT_DIR
+from xyz import ROOT_DIR
 
 # clean terminal view
 logging.getLogger('tensorflow').disabled = True
@@ -142,7 +143,7 @@ class botNet:
 
         # Dataset options
         dataset_args = parser.add_argument_group('Dataset options')
-        dataset_args.add_argument('--corpus', type=str, default='cornell', help='Corpus for trainning data. Adding more dataset (Future development)')
+        dataset_args.add_argument('--corpus', type=str, choices=['cornell', 'reddit'], default='cornell', help='Corpus for trainning data. Adding more dataset (Future development)')
         dataset_args.add_argument('--max_samples', type=int, default=30000, help='Max samples for a dataset')
         dataset_args.add_argument('--vocab_size', type=int, default=2**13, help='Max size for vocab file')
         dataset_args.add_argument('--max_length', type=int, default=40, help='Max length for a sentence')
@@ -172,7 +173,10 @@ class botNet:
         if not self.args.root_dir:
             self.args.root_dir = os.getcwd()
         # Data objects
-        self.process = dataHandler(self.args)
+        if self.args.corpus == 'cornell':
+            self.process = cornellHandler(self.args)
+        else:
+            self.process = redditHandler(self.args)
         # Misc dir object
         self.model_dir, self.log_dir = self._get_directory()
         self.checkpoint = self._get_checkpoint()

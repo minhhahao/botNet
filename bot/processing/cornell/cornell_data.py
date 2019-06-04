@@ -16,7 +16,6 @@
 '''
     Descriptions: Data Preprocessing with tfds
         Corpus: Cornell Movie Dialogs (default)
-        TODO: increase database size
 '''
 # import future
 from __future__ import absolute_import
@@ -32,9 +31,9 @@ import tensorflow as tf
 
 # import module from file
 from bot.utils import preprocess_sentence
-from misc import ROOT_DIR
+from xyz import ROOT_DIR
 
-class dataHandler:
+class cornellHandler:
     '''
     Processing datafile
     Returns:

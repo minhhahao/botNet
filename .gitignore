@@ -1,4 +1,4 @@
-# Root ignore file. Remember to create misc.py to run web server
+# Root ignore file. Remember to create xyz.py to run web server
 __pycache__/
 __init__.py
-misc.py
+xyz.py

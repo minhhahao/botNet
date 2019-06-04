@@ -96,9 +96,9 @@ def main():
             raise argparse.ArgumentTypeError('Boolean value expected.')
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--input_file', type=str, default='reddit_data',
+    parser.add_argument('--input_dir', type=str, default='reddit_data',
                         help='data file or directory containing bz2 archive of json reddit data')
-    parser.add_argument('--log_dir', type=str, default='output/',
+    parser.add_argument('--output_dir', type=str, default='output/',
                         help='directory to save the output and report')
     parser.add_argument('--config_file', type=str, default='parser_config.json',
                         help='json parameters for parsing')
@@ -134,17 +134,17 @@ def parse_main(args):
         subreddit_whitelist = set(config['subreddit_whitelist'])
         substring_blacklist = set(config['substring_blacklist'])
 
-        if not os.path.exists(args.input_file):
-            print("File not found: {}".format(args.input_file))
+        if not os.path.exists(args.input_dir):
+            print("File not found: {}".format(args.input_dir))
             return
-        if os.path.isfile(args.log_dir):
-            print("File already exists at output directory location: {}".format(args.log_dir))
+        if os.path.isfile(args.output_dir):
+            print("File already exists at output directory location: {}".format(args.output_dir))
             return
-        if not os.path.exists(args.log_dir):
-            os.makedirs(args.log_dir)
+        if not os.path.exists(args.output_dir):
+            os.makedirs(args.output_dir)
 
-        raw_data = raw_data_generator(args.input_file)
-        output_handler = OutputHandler(os.path.join(args.log_dir, OUTPUT_FILE), args.output_file_size)
+        raw_data = raw_data_generator(args.input_dir)
+        output_handler = OutputHandler(os.path.join(args.output_dir, OUTPUT_FILE), args.output_file_size)
 
         while not done:
             done, i = read_comments_into_cache(raw_data, comment_dict, args.print_every, args.print_subreddit,
@@ -154,9 +154,9 @@ def parse_main(args):
             process_comment_cache(comment_dict, args.print_every)
             write_comment_cache(comment_dict, output_handler, args.print_every,
                                 args.print_subreddit, args.min_conversation_length)
-            write_report(os.path.join(args.log_dir, REPORT_FILE), subreddit_dict)
+            write_report(os.path.join(args.output_dir, REPORT_FILE), subreddit_dict)
             comment_dict.clear()
-        print("\nRead all {:,d} lines from {}.".format(total_read, args.input_file))
+        print("\nRead all {:,d} lines from {}.".format(total_read,  args.input_dir))
     except (KeyboardInterrupt, SystemError):
         print('\nInterupt detected. Terminating...\n')
 
