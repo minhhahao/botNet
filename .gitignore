@@ -1,4 +1,2 @@
 # Root ignore file. Remember to create xyz.py to run web server
 __pycache__/
-__init__.py
-xyz.py

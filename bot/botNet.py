@@ -36,7 +36,7 @@ from bot.processing.cornell.cornell_data import cornellHandler
 from bot.processing.reddit.reddit_data import redditHandler
 from bot.model import transformer
 from bot.utils import _get_user_input, preprocess_sentence
-from xyz import ROOT_DIR
+from main import ROOT_DIR
 
 # clean terminal view
 logging.getLogger('tensorflow').disabled = True

@@ -31,7 +31,7 @@ import tensorflow as tf
 
 # import module from file
 from bot.utils import preprocess_sentence
-from xyz import ROOT_DIR
+from main import ROOT_DIR
 
 class cornellHandler:
     '''
