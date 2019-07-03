@@ -61,7 +61,7 @@ def _get_user_input():
 
 class Draw:
     '''
-    I'm kinda lazy rn so this is just a subclass to draw the model or
+    This is just a subclass to draw the model or
     learning rate for better visualisation
     '''
     import matplotlib.pyplot as plt

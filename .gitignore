@@ -1,2 +1,17 @@
-# Root ignore file. Remember to create xyz.py to run web server
-__pycache__/
+# Root ignore file
+
+# Ignore model and python cache
+model-*/
+*.pyc
+
+# Ignore reddit data
+*.bz2
+
+# Ignore tokenizer file and output.txt
+tokenizer-*
+output.txt
+
+# Ignore local database and redis dump
+*.sqlite3
+dump.rdb
+*.log

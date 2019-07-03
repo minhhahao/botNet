@@ -28,6 +28,7 @@ import os
 import json
 import re
 import sys
+from main import ROOT_DIR
 
 # General __init__
 FILE_SUFFIX = ".bz2"
@@ -83,10 +84,15 @@ class RedditComment(object):
         if record_subreddit:
             self.subreddit = json_object['subreddit']
 
+# input, output directory for reddit data
+in_dir = ROOT_DIR + os.sep + 'data' + os.sep + 'reddit' + os.sep + 'RC'
+out_dir = ROOT_DIR + os.sep + 'data' + os.sep + 'reddit' + os.sep + 'output'
+
 def main():
     assert sys.version_info >= (3, 3), \
         "Must be run in Python 3.3 or later. You are running {}".format(sys.version)
 
+    # Convert string to boolean
     def str2bool(v):
         if v.lower() in ('yes', 'true', 't', 'y', '1'):
             return True
@@ -96,27 +102,28 @@ def main():
             raise argparse.ArgumentTypeError('Boolean value expected.')
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--input_dir', type=str, default='reddit_data',
-                        help='data file or directory containing bz2 archive of json reddit data')
-    parser.add_argument('--output_dir', type=str, default='output/',
-                        help='directory to save the output and report')
+    parser.add_argument('--input_dir', type=str, default=in_dir,
+                        help='Data file or directory containing bz2 archive of json reddit data')
+    parser.add_argument('--output_dir', type=str, default=out_dir,
+                        help='Directory to save the output and report')
     parser.add_argument('--config_file', type=str, default='parser_config.json',
-                        help='json parameters for parsing')
+                        help='JSON parameters for parsing')
     parser.add_argument('--comment_cache_size', type=int, default=1e7,
-                        help='max number of comments to cache in memory before flushing')
+                        help='Max number of comments to cache in memory before flushing')
     parser.add_argument('--output_file_size', type=int, default=2e8,
-                        help='max size of each output file (give or take one conversation)')
+                        help='Max size of each output file (give or take one conversation)')
     parser.add_argument('--print_every', type=int, default=1000,
-                        help='print an update to the screen this often')
+                        help='Print an update to the screen this often')
     parser.add_argument('--min_conversation_length', type=int, default=5,
-                        help='conversations must have at least this many comments for inclusion')
+                        help='Conversations must have at least this many comments for inclusion')
     parser.add_argument('--print_subreddit', type=str2bool, nargs='?',
                         const=False, default=False,
-                        help='set to true to print the name of the subreddit before each conversation'
+                        help='Set to true to print the name of the subreddit before each conversation'
                         + ' to facilitate more convenient blacklisting in the config json file.'
                         + ' (Remember to disable before constructing training data.)')
     args = parser.parse_args()
     parse_main(args)
+
 
 def parse_main(args):
     try:
@@ -160,6 +167,7 @@ def parse_main(args):
     except (KeyboardInterrupt, SystemError):
         print('\nInterupt detected. Terminating...\n')
 
+
 def raw_data_generator(path):
     if os.path.isdir(path):
         for walk_root, walk_dir, walk_files in os.walk(path):
@@ -181,6 +189,7 @@ def raw_data_generator(path):
         with bz2.open(path, "rt") as raw_data:
             for line in raw_data:
                 yield line
+
 
 def read_comments_into_cache(raw_data, comment_dict, print_every, print_subreddit, comment_cache_size,
                              subreddit_dict, subreddit_blacklist, subreddit_whitelist, substring_blacklist):
@@ -209,6 +218,7 @@ def read_comments_into_cache(raw_data, comment_dict, print_every, print_subreddi
         done = True
     print()
     return done, i
+
 
 def post_qualifies(json_object, subreddit_blacklist, subreddit_whitelist, substring_blacklist):
     body = json_object['body']
@@ -240,6 +250,7 @@ def post_qualifies(json_object, subreddit_blacklist, subreddit_whitelist, substr
     if not json_object['id'].startswith('t1_'):
         json_object['id'] = 't1_' + json_object['id']
     return True
+
 
 def process_comment_cache(comment_dict, print_every):
     i = 0
@@ -311,5 +322,6 @@ def write_report(report_file_path, subreddit_dict):
             f.write("{}: {}\n".format(*item))
 
 
+# Run file from cmd
 if __name__ == '__main__':
     main()

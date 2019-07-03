@@ -96,7 +96,8 @@ class botNet:
         DAEMON = 'daemon'
 
     def __init__(self):
-        '''pretty self-explanatory
+        '''
+        pretty self-explanatory
         '''
         # Model/dataset parameters
         self.args = None
@@ -143,7 +144,7 @@ class botNet:
 
         # Dataset options
         dataset_args = parser.add_argument_group('Dataset options')
-        dataset_args.add_argument('--corpus', type=str, choices=['cornell', 'reddit'], default='cornell', help='Corpus for trainning data. Adding more dataset (Future development)')
+        dataset_args.add_argument('--corpus', type=str, choices=['cornell', 'reddit'], default='cornell', help='Corpus for training data. Adding more dataset (Future development)')
         dataset_args.add_argument('--max_samples', type=int, default=30000, help='Max samples for a dataset')
         dataset_args.add_argument('--vocab_size', type=int, default=2**13, help='Max size for vocab file')
         dataset_args.add_argument('--max_length', type=int, default=40, help='Max length for a sentence')
@@ -239,7 +240,7 @@ class botNet:
         model_test.load_weights(tf.train.latest_checkpoint(self.checkpoint_dir))
         # Writing outputs to file
         print('\nHey. I might understand what you are about to talk to me.')
-        with open(os.path.join(self.process.DATA_PATH, self.process.SAMPLES_PATH, self.OUTPUT_FILE), 'w+') as output_file:
+        with open(os.path.join(self.process.DATA_PATH, self.process.SAMPLES_PATH, self.OUTPUT_FILE), 'a+') as output_file:
             try:
                 output_file.write('-'*100 + '\n')
                 output_file.write(datetime.datetime.now().strftime("%Y%m%d-%H%M%S"))
@@ -251,6 +252,7 @@ class botNet:
                         break
                     output_file.write('\nInput: {}\n'.format(line))
                     output_file.write('Output: {}\n'.format(self.predict(model_test, line)))
+                output_file.write('-'*100 + '\n')
                 output_file.close()
             except KeyboardInterrupt:
                 print('\nTerminated')
@@ -262,7 +264,7 @@ class botNet:
         Args:
             sentence <str>: the raw input sentence
         return:
-            <str>: bot respond
+            <str>: Bot respond
         '''
         model_daemon = self.model()
         model_daemon.load_weights(tf.train.latest_checkpoint(self.checkpoint_dir))
