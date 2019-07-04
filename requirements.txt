@@ -6,7 +6,7 @@ packaging
 
 # localhost deployment
 channels==1.1.8
-django==1.11.21
+django>=1.11.22
 asgiref==1.1.2
 asgi-redis==1.4.3
 
